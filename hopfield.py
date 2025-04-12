@@ -69,21 +69,20 @@ def update_neurons(neurons_number, neurons, couplings, temperature):
     return neurons
 
 
-def run_dynamic(neurons, neurons_number, couplings, steps, temperature):
+def dynamic(neurons, neurons_number, couplings, patterns, steps, temperature):
     for t in range(steps):
         neurons = update_neurons(neurons_number, neurons, couplings, temperature)
         magn = compute_magn_first_pattern(neurons_number, neurons, patterns)
         neurons_aligned = number_of_neurons_aligned(neurons_number, neurons, patterns)
         if t % 100 == 0:
-            print(f"Step {t}: Magnetization = {magn} | Aligned Neurons = {neurons_aligned}")
+            print(f"{t}, {magn}, {neurons_aligned}")
     return neurons
 
-
-def run_simulation(N, p, t_max, a, T):
+def simulation(N, p, t_max, a, T):
     patterns = extract_pattern(N, p, a)
     couplings = compute_couplings(patterns)
     neurons = init_net_first_pattern(N, patterns)
-    neurons = run_dynamic(neurons, N, couplings, t_max, T)
+    neurons = dynamic(neurons, N, couplings, patterns, t_max, T)
     return neurons
 
 
@@ -98,32 +97,12 @@ parser.add_argument("-s", type=int, default=20, help="number of samples")
 
 arguments = parser.parse_args()
 
-print(f"And now you can play with these: {arguments}.")
+print(f"# Simulation with: {arguments}. \n# Time step, Magnetization, Number of Neurons Aligned")
 
-run_simulation(
+simulation(
     N=arguments.N,
     p=arguments.p,
     t_max=arguments.t,
     a=arguments.a,
     T=arguments.T
 )
-
-
-'''
-# Example usage 
-N=1000 # number of neurons
-p=8 # number of patterns
-t_max=3000 # number of temporal steps
-a=0.7 # parameter of the distribution of probability
-T=0.1 # temperature of the system
-# s=20 # number of samples, i'll use it later
-   
-patterns = extract_pattern(N, p, a)
-couplings = compute_couplings(patterns)
-neurons = init_net_first_pattern(N, patterns)
-neurons = run_dynamic(neurons, N, couplings, t_max, T)
-"""
-print("First pattern:", patterns[:, 0])
-print("Final state of neurons:", neurons)
-"""
-'''
