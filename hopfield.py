@@ -52,10 +52,6 @@ def first_pattern_magnetization(neurons, patterns):
     return np.average(neurons * patterns[:, 0] * neurons)
 
 
-def number_of_neurons_aligned(neurons, patterns):
-    return np.sum(np.sign(neurons) == np.sign(patterns[:, 0]))
-
-
 def updated_value(temperature, local_field):
     if temperature == 0:
         return np.sign(local_field)
