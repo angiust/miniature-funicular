@@ -1,9 +1,11 @@
 import numpy as np
 
-# This code implements a Hopfield network with a mixture of distributions for the patterns.
-# The network is initialized with a set of patterns, and the neurons are updated based on the couplings between them.
-# The patterns are sampled from a mixture of Laplace and delta distributions.
-# The network dynamics are run for a specified number of steps, and the magnitude of the first pattern is computed at each step.
+"""
+This code implements a Hopfield network with a mixture of distributions for the patterns.
+The network is initialized with a set of patterns, and the neurons are updated based on the couplings between them.
+The patterns are sampled from a mixture of Laplace and delta distributions.
+The network dynamics are run for a specified number of steps, and the magnitude of the first pattern is computed at each step.
+"""
 
 # np.random.seed(0)  # Set the random seed for reproducibility
 
@@ -13,7 +15,7 @@ def sign(x):
     if x > 0:
         return 1
     if x == 0:
-        return 2 * (np.random.rand() < 0.5) - 1 # np.random.choice([-1, 1])
+        return 2 * (np.random.rand() < 0.5) - 1  # np.random.choice([-1, 1])
 
 
 def sample_mixture(a):
@@ -25,11 +27,11 @@ def sample_mixture(a):
     if u < a:
         return np.random.laplace(loc=0, scale=np.sqrt(2))
     else:
-        return 2 * (np.random.rand() < 0.5) - 1 # np.random.choice([-1, 1])
+        return 2 * (np.random.rand() < 0.5) - 1  # np.random.choice([-1, 1])
 
 
 def extract_pattern(neurons_number, patterns_number, distribution_param):
-    patterns=np.zeros((neurons_number, patterns_number))
+    patterns = np.zeros((neurons_number, patterns_number))
     for mu in range(patterns_number):
         for i in range(neurons_number):
             patterns[i, mu] = sample_mixture(distribution_param)
@@ -37,15 +39,15 @@ def extract_pattern(neurons_number, patterns_number, distribution_param):
 
 
 def compute_couplings(neurons_number, patterns):
-    couplings = 1/neurons_number * patterns @ patterns.T
+    couplings = 1 / neurons_number * patterns @ patterns.T
     np.fill_diagonal(couplings, 0)
     return couplings
 
 
 def init_net_first_pattern(neurons_number, patterns):
-    neurons=np.zeros(neurons_number)
+    neurons = np.zeros(neurons_number)
     for i in range(neurons_number):
-        neurons[i]=sign(patterns[i,0])
+        neurons[i] = sign(patterns[i, 0])
     return neurons
 
 
@@ -88,6 +90,6 @@ def simulation(N, p, t_max, a, T):
     return dynamic(neurons, N, couplings, patterns, t_max, T)
 
 
-# run different simulation with resampling
 def multiple_simulation(N, p, t_max, a, T, s):
+    """run different simulation with resampling"""
     return [simulation(N, p, t_max, a, T) for _ in range(s)]
