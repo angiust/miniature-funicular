@@ -30,54 +30,49 @@ def sample_mixture(a):
 
 
 def extract_pattern(neurons_number, patterns_number, distribution_param):
-    patterns = np.zeros((neurons_number, patterns_number))
-    for mu in range(patterns_number):
-        for i in range(neurons_number):
-            patterns[i, mu] = sample_mixture(distribution_param)
-    return patterns
+    """Sample a random number from the distribution: p(ξ) = a/(2√2) * exp(-|ξ|/√2) + (1-a)/2 * [δ(ξ-1) + δ(ξ+1)]"""
+    mask = np.random.rand(neurons_number, patterns_number) < distribution_param
+    laplace = np.random.laplace(loc=0, scale=np.sqrt(2), size=(neurons_number, patterns_number))
+    delta = np.random.choice([-1.0, 1.0], size=(neurons_number, patterns_number))
+    return np.where(mask, laplace, delta)
 
 
 def compute_couplings(neurons_number, patterns):
-    couplings = 1 / neurons_number * patterns @ patterns.T
+    couplings = (patterns @ patterns.T) / neurons_number
     np.fill_diagonal(couplings, 0)
     return couplings
 
 
-def init_net_first_pattern(neurons_number, patterns):
-    neurons = np.zeros(neurons_number)
-    for i in range(neurons_number):
-        neurons[i] = sign(patterns[i, 0])
-    return neurons
+def init_net_first_pattern(patterns):
+    return np.sign(patterns[:, 0])
 
 
-def compute_magn_first_pattern(neurons_number, neurons, patterns):
-    magn = np.dot(patterns[:, 0], neurons)
-    return magn / neurons_number
+def first_pattern_magnetization(neurons, patterns):
+    return np.average(neurons * patterns[:, 0] * neurons)
 
 
-def number_of_neurons_aligned(neurons_number, neurons, patterns):
-    aligned = 0
-    for i in range(neurons_number):
-        if neurons[i] == sign(patterns[i, 0]):
-            aligned += 1
-    return aligned
+def number_of_neurons_aligned(neurons, patterns):
+    return np.sum(np.sign(neurons) == np.sign(patterns[:, 0]))
 
 
-def update_neurons(neurons_number, neurons, couplings, temperature):
-    neuron_picked = np.random.randint(0, neurons_number)
-    local_field = np.dot(couplings[neuron_picked, :], neurons)
+def updated_value(temperature, local_field):
     if temperature == 0:
-        neurons[neuron_picked] = sign(local_field)
-    else:
-        neurons[neuron_picked] = 2 * (np.random.rand() < (1 + np.tanh(local_field / temperature)) / 2) - 1
+        return np.sign(local_field)
+    return 2 * (np.random.rand() < (1 + np.tanh(local_field / temperature)) / 2) - 1
+
+
+def update_neurons(neurons, couplings, temperature):
+    neuron_picked = np.random.randint(neurons.size)
+    local_field = np.dot(couplings[neuron_picked, :], neurons)
+    neurons[neuron_picked] = updated_value(temperature, local_field)
     return neurons
 
 
-def dynamic(neurons, neurons_number, couplings, patterns, steps, temperature):
+def dynamic(neurons, couplings, patterns, steps, temperature):
     magnetizations = []
     for t in range(steps):
-        neurons = update_neurons(neurons_number, neurons, couplings, temperature)
-        magnetization = first_pattern_magnetization(neurons_number, neurons, patterns)
+        neurons = update_neurons(neurons, couplings, temperature)
+        magnetization = first_pattern_magnetization(neurons, patterns)
         magnetizations.append(magnetization)
     return magnetizations
 
@@ -85,9 +80,9 @@ def dynamic(neurons, neurons_number, couplings, patterns, steps, temperature):
 def bare_simulation(N, p, t_max, a, T):
     patterns = extract_pattern(N, p, a)
     couplings = compute_couplings(N, patterns)
-    neurons = init_net_first_pattern(N, patterns)
+    neurons = init_net_first_pattern(patterns)
 
-    return dynamic(neurons, N, couplings, patterns, t_max, T)
+    return dynamic(neurons, couplings, patterns, t_max, T)
 
 
 def wrap_into_array(t_max, magnetizations):
