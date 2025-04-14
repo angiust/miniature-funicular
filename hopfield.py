@@ -6,6 +6,8 @@ import numpy as np
 # The patterns are sampled from a mixture of Laplace and delta distributions.
 # The network dynamics are run for a specified number of steps, and the magnitude of the first pattern is computed at each step.
 
+# np.random.seed(0)  # Set the random seed for reproducibility
+
 def sign(x):
     if x < 0:
         return -1
@@ -61,7 +63,7 @@ def number_of_neurons_aligned(neurons_number, neurons, patterns):
 
 def update_neurons(neurons_number, neurons, couplings, temperature):
     neuron_picked = np.random.randint(0, neurons_number)
-    local_field = np.sum(couplings[neuron_picked, :] * neurons)
+    local_field = np.dot(couplings[neuron_picked, :], neurons)
     if temperature == 0:
         neurons[neuron_picked] = sign(local_field)
     else:
@@ -70,26 +72,37 @@ def update_neurons(neurons_number, neurons, couplings, temperature):
 
 
 def dynamic(neurons, neurons_number, couplings, patterns, steps, temperature):
+    time_step = []
+    magnetization = []
     for t in range(steps):
         neurons = update_neurons(neurons_number, neurons, couplings, temperature)
-        magn = compute_magn_first_pattern(neurons_number, neurons, patterns)
-        neurons_aligned = number_of_neurons_aligned(neurons_number, neurons, patterns)
-        if t % 100 == 0:
-            print(f"{t}, {magn}, {neurons_aligned}")
-    return neurons
+        if t % 1000 == 0:
+            magn = compute_magn_first_pattern(neurons_number, neurons, patterns)
+            magnetization.append(magn)
+            time_step.append(t)
+            # neurons_aligned = number_of_neurons_aligned(neurons_number, neurons, patterns)
+            print(f"{t}, {magn}") # print(f"{t}, {magn}, {neurons_aligned}")
+    return magnetization, time_step
+
 
 def simulation(N, p, t_max, a, T):
     patterns = extract_pattern(N, p, a)
     couplings = compute_couplings(N, patterns)
     neurons = init_net_first_pattern(N, patterns)
-    neurons = dynamic(neurons, N, couplings, patterns, t_max, T)
-    return neurons
+    magnetization, time_step = dynamic(neurons, N, couplings, patterns, t_max, T)
+    return magnetization, time_step
 
+
+# run different simulation with resampling
+def multiple_simulation(N, p, t_max, a, T, s):
+    for i in range(s):
+        print(f"Simulation {i+1}")
+        simulation(N, p, t_max, a, T)
 
 parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 parser.add_argument("-N", type=int, default=1000, help="number of neurons")
 parser.add_argument("-p", type=int, default=8, help="number of patterns")
-parser.add_argument("-t", type=int, default=3000, help="number of temporal steps")
+parser.add_argument("-t", type=int, default=1*10*1000, help="number of temporal steps")
 parser.add_argument("-a", type=float, default=0, help="parameter of the distribution of probability")
 parser.add_argument("-T", type=float, default=0, help="temperature of the system")
 parser.add_argument("-s", type=int, default=20, help="number of samples")
@@ -97,12 +110,13 @@ parser.add_argument("-s", type=int, default=20, help="number of samples")
 
 arguments = parser.parse_args()
 
-print(f"# Simulation with: {arguments}. \n# Time step, Magnetization, Number of Neurons Aligned")
+print(f"# Simulation with: {arguments}. \n# Time step, Magnetization")
 
-simulation(
+multiple_simulation(
     N=arguments.N,
     p=arguments.p,
     t_max=arguments.t,
     a=arguments.a,
-    T=arguments.T
+    T=arguments.T,
+    s=arguments.s
 )
