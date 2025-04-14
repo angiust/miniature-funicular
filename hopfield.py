@@ -8,8 +8,6 @@ The network dynamics are run for a specified number of steps, and the magnitude 
 """
 
 
-# np.random.seed(0)  # Set the random seed for reproducibility
-
 def sign(x):
     if x < 0:
         return -1

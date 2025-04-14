@@ -12,8 +12,12 @@ parser.add_argument("-t", type=int, default=3000, help="number of temporal steps
 parser.add_argument("-a", type=float, default=0, help="parameter of the distribution of probability")
 parser.add_argument("-T", type=float, default=0, help="temperature of the system")
 parser.add_argument("-s", type=int, default=20, help="number of samples")
+parser.add_argument("--seed", type=int, default=None, help="random seed for reproducibility")
 
 arguments = parser.parse_args()
+
+if arguments.seed is not None:
+    np.random.seed(arguments.seed)
 
 evolution = simulation(
     N=arguments.N,
