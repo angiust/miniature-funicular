@@ -45,6 +45,7 @@ def compute_couplings(neurons_number, patterns):
 
 
 def init_net_first_pattern(patterns):
+    assert np.all(patterns[:,0] != 0), "sign of patterns should be non-zero"
     return np.sign(patterns[:, 0])
 
 
@@ -54,6 +55,7 @@ def first_pattern_magnetization(neurons, patterns):
 
 def updated_value(temperature, local_field):
     if temperature == 0:
+        assert local_field != 0, "sign of 0 local field is concerning!"
         return np.sign(local_field)
     return 2 * (np.random.rand() < (1 + np.tanh(local_field / temperature)) / 2) - 1
 
