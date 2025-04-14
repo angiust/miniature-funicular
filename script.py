@@ -1,5 +1,5 @@
 import argparse
-from hopfield import run_simulation
+from hopfield import simulation
 
 parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 parser.add_argument("-N", type=int, default=1000, help="number of neurons")
@@ -14,10 +14,12 @@ arguments = parser.parse_args()
 
 print(f"And now you can play with these: {arguments}.")
 
-run_simulation(
+evolution_data = simulation(
     N=arguments.N,
     p=arguments.p,
     t_max=arguments.t,
     a=arguments.a,
     T=arguments.T
 )
+
+print(evolution_data)

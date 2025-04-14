@@ -68,34 +68,26 @@ def update_neurons(neurons_number, neurons, couplings, temperature):
     if temperature == 0:
         neurons[neuron_picked] = sign(local_field)
     else:
-        neurons[neuron_picked] = 2 * (np.random.rand() < (1+np.tanh(local_field/temperature))/2) - 1
+        neurons[neuron_picked] = 2 * (np.random.rand() < (1 + np.tanh(local_field / temperature)) / 2) - 1
     return neurons
 
 
 def dynamic(neurons, neurons_number, couplings, patterns, steps, temperature):
-    time_step = []
-    magnetization = []
+    evolution_data = []
     for t in range(steps):
         neurons = update_neurons(neurons_number, neurons, couplings, temperature)
-        if t % 1000 == 0:
-            magn = compute_magn_first_pattern(neurons_number, neurons, patterns)
-            magnetization.append(magn)
-            time_step.append(t)
-            # neurons_aligned = number_of_neurons_aligned(neurons_number, neurons, patterns)
-            print(f"{t}, {magn}") # print(f"{t}, {magn}, {neurons_aligned}")
-    return magnetization, time_step
+        magnetization = compute_magn_first_pattern(neurons_number, neurons, patterns)
+        evolution_data.append((t, magnetization))
+    return evolution_data
 
 
 def simulation(N, p, t_max, a, T):
     patterns = extract_pattern(N, p, a)
     couplings = compute_couplings(N, patterns)
     neurons = init_net_first_pattern(N, patterns)
-    magnetization, time_step = dynamic(neurons, N, couplings, patterns, t_max, T)
-    return magnetization, time_step
+    return dynamic(neurons, N, couplings, patterns, t_max, T)
 
 
 # run different simulation with resampling
 def multiple_simulation(N, p, t_max, a, T, s):
-    for i in range(s):
-        print(f"Simulation {i+1}")
-        simulation(N, p, t_max, a, T)
+    return [simulation(N, p, t_max, a, T) for _ in range(s)]
