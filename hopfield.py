@@ -17,7 +17,11 @@ def sign(x):
         return 2 * (np.random.rand() < 0.5) - 1 # np.random.choice([-1, 1])
 
 
-def sample_mixture(a): # Sample a random number from the distribution: p(ξ) = a/(2√2) * exp(-|ξ|/√2) + (1-a)/2 * [δ(ξ-1) + δ(ξ+1)]
+def sample_mixture(a):
+    """
+    Sample a random number from the distribution:
+    p(ξ) = a/(2√2) * exp(-|ξ|/√2) + (1-a)/2 * [δ(ξ-1) + δ(ξ+1)]
+    """
     u = np.random.rand()
     if u < a:
         return np.random.laplace(loc=0, scale=np.sqrt(2))
@@ -47,9 +51,7 @@ def init_net_first_pattern(neurons_number, patterns):
 
 
 def compute_magn_first_pattern(neurons_number, neurons, patterns):
-    magn = 0
-    for i in range(neurons_number):
-        magn += neurons[i] * patterns[i,0]
+    magn = np.dot(patterns[:, 0], neurons)
     return magn / neurons_number
 
 
