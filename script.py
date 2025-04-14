@@ -8,11 +8,8 @@ parser.add_argument("-t", type=int, default=3000, help="number of temporal steps
 parser.add_argument("-a", type=float, default=0, help="parameter of the distribution of probability")
 parser.add_argument("-T", type=float, default=0, help="temperature of the system")
 parser.add_argument("-s", type=int, default=20, help="number of samples")
-# many more arguments
 
 arguments = parser.parse_args()
-
-print(f"And now you can play with these: {arguments}.")
 
 evolution_data = simulation(
     N=arguments.N,
@@ -22,4 +19,4 @@ evolution_data = simulation(
     T=arguments.T
 )
 
-print(evolution_data)
+print(evolution_data[::100])
