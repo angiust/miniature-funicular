@@ -26,7 +26,7 @@ evolution = simulation(
     a=arguments.a,
     T=arguments.T
 )
-
+"""
 multiple_evolution = multiple_simulation(
     N=arguments.N,
     p=arguments.p,
@@ -35,7 +35,7 @@ multiple_evolution = multiple_simulation(
     T=arguments.T,
     s=arguments.s
 )
-
+"""
 np.savetxt(sys.stdout, evolution, fmt=('%.f', '%.4f'), delimiter=',')
 
-print(multiple_evolution)
+#print(multiple_evolution)
