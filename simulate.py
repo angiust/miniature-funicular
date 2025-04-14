@@ -3,7 +3,7 @@ import sys
 
 import numpy as np
 
-from hopfield import simulation
+from hopfield import simulation, multiple_simulation
 
 parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 parser.add_argument("-N", type=int, default=1000, help="number of neurons")
@@ -27,4 +27,15 @@ evolution = simulation(
     T=arguments.T
 )
 
+multiple_evolution = multiple_simulation(
+    N=arguments.N,
+    p=arguments.p,
+    t_max=arguments.t,
+    a=arguments.a,
+    T=arguments.T,
+    s=arguments.s
+)
+
 np.savetxt(sys.stdout, evolution, fmt=('%.f', '%.4f'), delimiter=',')
+
+print(multiple_evolution)
