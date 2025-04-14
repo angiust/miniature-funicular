@@ -75,6 +75,7 @@ def dynamic(neurons, couplings, patterns, steps, temperature):
 def bare_simulation(N, p, t_max, a, T):
     patterns = extract_pattern(N, p, a)
     couplings = compute_couplings(N, patterns)
+    assert np.max(np.abs(couplings)) < 1.0, "couplings should be less than 1"
     neurons = init_net_first_pattern(patterns)
 
     return np.fromiter(dynamic(neurons, couplings, patterns, t_max, T), float)
