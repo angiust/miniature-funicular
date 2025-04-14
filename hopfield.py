@@ -66,16 +66,12 @@ def update_neurons(neurons, couplings, temperature):
     neuron_picked = np.random.randint(neurons.size)
     local_field = np.dot(couplings[neuron_picked, :], neurons)
     neurons[neuron_picked] = updated_value(temperature, local_field)
-    return neurons
 
 
 def dynamic(neurons, couplings, patterns, steps, temperature):
-    magnetizations = []
-    for t in range(steps):
-        neurons = update_neurons(neurons, couplings, temperature)
-        magnetization = first_pattern_magnetization(neurons, patterns)
-        magnetizations.append(magnetization)
-    return magnetizations
+    for _ in range(steps):
+        update_neurons(neurons, couplings, temperature)
+        yield first_pattern_magnetization(neurons, patterns)
 
 
 def bare_simulation(N, p, t_max, a, T):
@@ -83,7 +79,7 @@ def bare_simulation(N, p, t_max, a, T):
     couplings = compute_couplings(N, patterns)
     neurons = init_net_first_pattern(patterns)
 
-    return dynamic(neurons, couplings, patterns, t_max, T)
+    return np.fromiter(dynamic(neurons, couplings, patterns, t_max, T), float)
 
 
 def wrap_into_array(t_max, magnetization):
