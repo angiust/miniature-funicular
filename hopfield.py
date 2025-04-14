@@ -7,6 +7,7 @@ The patterns are sampled from a mixture of Laplace and delta distributions.
 The network dynamics are run for a specified number of steps, and the magnitude of the first pattern is computed at each step.
 """
 
+
 # np.random.seed(0)  # Set the random seed for reproducibility
 
 def sign(x):
@@ -83,11 +84,25 @@ def dynamic(neurons, neurons_number, couplings, patterns, steps, temperature):
     return magnetizations
 
 
-def simulation(N, p, t_max, a, T):
+def bare_simulation(N, p, t_max, a, T):
     patterns = extract_pattern(N, p, a)
     couplings = compute_couplings(N, patterns)
     neurons = init_net_first_pattern(N, patterns)
+
     return dynamic(neurons, N, couplings, patterns, t_max, T)
+
+
+def wrap_into_array(t_max, magnetizations):
+    dtype = [("t", int), ("magnetization", float)]
+    array = np.empty(t_max, dtype=dtype)
+    array["t"] = range(t_max)
+    array["magnetization"] = magnetizations
+    return array
+
+
+def simulation(N, p, t_max, a, T):
+    evolution = bare_simulation(N, p, t_max, a, T)
+    return wrap_into_array(t_max, evolution)
 
 
 def multiple_simulation(N, p, t_max, a, T, s):

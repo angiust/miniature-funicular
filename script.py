@@ -1,4 +1,8 @@
 import argparse
+import sys
+
+import numpy as np
+
 from hopfield import simulation
 
 parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
@@ -11,7 +15,7 @@ parser.add_argument("-s", type=int, default=20, help="number of samples")
 
 arguments = parser.parse_args()
 
-evolution_data = simulation(
+evolution = simulation(
     N=arguments.N,
     p=arguments.p,
     t_max=arguments.t,
@@ -19,4 +23,4 @@ evolution_data = simulation(
     T=arguments.T
 )
 
-print(list(zip(range(len(evolution_data)), evolution_data))[::100])
+np.savetxt(sys.stdout, evolution, fmt=('%.f', '%.4f'), delimiter=',')
