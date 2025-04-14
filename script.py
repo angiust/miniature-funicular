@@ -19,4 +19,4 @@ evolution_data = simulation(
     T=arguments.T
 )
 
-print(evolution_data[::100])
+print(list(zip(range(len(evolution_data)), evolution_data))[::100])

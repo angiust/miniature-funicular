@@ -75,12 +75,12 @@ def update_neurons(neurons_number, neurons, couplings, temperature):
 
 
 def dynamic(neurons, neurons_number, couplings, patterns, steps, temperature):
-    evolution_data = []
+    magnetizations = []
     for t in range(steps):
         neurons = update_neurons(neurons_number, neurons, couplings, temperature)
         magnetization = first_pattern_magnetization(neurons_number, neurons, patterns)
-        evolution_data.append((t, magnetization))
-    return evolution_data
+        magnetizations.append(magnetization)
+    return magnetizations
 
 
 def simulation(N, p, t_max, a, T):
