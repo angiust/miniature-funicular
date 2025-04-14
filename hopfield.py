@@ -31,8 +31,8 @@ def extract_pattern(neurons_number, patterns_number, distribution_param):
     return patterns
 
 
-def compute_couplings(patterns):
-    couplings = patterns @ patterns.T
+def compute_couplings(neurons_number, patterns):
+    couplings = 1/neurons_number * patterns @ patterns.T
     np.fill_diagonal(couplings, 0)
     return couplings
 
@@ -80,7 +80,7 @@ def dynamic(neurons, neurons_number, couplings, patterns, steps, temperature):
 
 def simulation(N, p, t_max, a, T):
     patterns = extract_pattern(N, p, a)
-    couplings = compute_couplings(patterns)
+    couplings = compute_couplings(N, patterns)
     neurons = init_net_first_pattern(N, patterns)
     neurons = dynamic(neurons, N, couplings, patterns, t_max, T)
     return neurons
