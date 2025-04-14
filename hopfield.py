@@ -31,9 +31,10 @@ def sample_mixture(a):
 
 def extract_pattern(neurons_number, patterns_number, distribution_param):
     """Sample a random number from the distribution: p(ξ) = a/(2√2) * exp(-|ξ|/√2) + (1-a)/2 * [δ(ξ-1) + δ(ξ+1)]"""
-    mask = np.random.rand(neurons_number, patterns_number) < distribution_param
-    laplace = np.random.laplace(loc=0, scale=np.sqrt(2), size=(neurons_number, patterns_number))
-    delta = np.random.choice([-1.0, 1.0], size=(neurons_number, patterns_number))
+    size = (neurons_number, patterns_number)
+    mask = np.random.rand(*size) < distribution_param
+    laplace = np.random.laplace(loc=0, scale=np.sqrt(2), size=size)
+    delta = np.random.choice([-1.0, 1.0], size=size)
     return np.where(mask, laplace, delta)
 
 
@@ -85,11 +86,11 @@ def bare_simulation(N, p, t_max, a, T):
     return dynamic(neurons, couplings, patterns, t_max, T)
 
 
-def wrap_into_array(t_max, magnetizations):
+def wrap_into_array(t_max, magnetization):
     dtype = [("t", int), ("magnetization", float)]
     array = np.empty(t_max, dtype=dtype)
     array["t"] = range(t_max)
-    array["magnetization"] = magnetizations
+    array["magnetization"] = magnetization
     return array
 
 
