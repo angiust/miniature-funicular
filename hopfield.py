@@ -50,7 +50,7 @@ def init_net_first_pattern(patterns):
 
 
 def first_pattern_magnetization(neurons, patterns):
-    return np.average(neurons * patterns[:, 0] * neurons)
+    return np.average(neurons * patterns[:, 0])
 
 
 def updated_value(temperature, local_field):
