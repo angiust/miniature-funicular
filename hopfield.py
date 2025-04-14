@@ -78,7 +78,7 @@ def dynamic(neurons, neurons_number, couplings, patterns, steps, temperature):
     evolution_data = []
     for t in range(steps):
         neurons = update_neurons(neurons_number, neurons, couplings, temperature)
-        magnetization = compute_magn_first_pattern(neurons_number, neurons, patterns)
+        magnetization = first_pattern_magnetization(neurons_number, neurons, patterns)
         evolution_data.append((t, magnetization))
     return evolution_data
 
