@@ -22,7 +22,7 @@ arguments = parser.parse_args()
 if arguments.seed is not None:
     np.random.seed(arguments.seed)
 
-multiple_simulation = multiple_simulation(
+multiple_evolution = multiple_simulation(
     N=arguments.N,
     p=arguments.p,
     sweep_max=arguments.t,
@@ -32,25 +32,4 @@ multiple_simulation = multiple_simulation(
     mixture=arguments.mix
 )
 
-"""Simulation of the Hopfield model with multiple patterns.
-if arguments.mix:
-    multiple_evolution = multiple_mixture_simulation(
-        N=arguments.N,
-        p=arguments.p,
-        sweep_max=arguments.t,
-        a=arguments.a,
-        T=arguments.T,
-        s=arguments.s
-    )
-
-else:
-    multiple_evolution = multiple_simulation(
-        N=arguments.N,
-        p=arguments.p,
-        sweep_max=arguments.t,
-        a=arguments.a,
-        T=arguments.T,
-        s=arguments.s
-    )
-"""
 np.savetxt(sys.stdout, multiple_evolution, fmt=('%.4f', '%.4f'), delimiter=',')
