@@ -5,7 +5,7 @@ import sys
 
 import numpy as np
 
-from hopfield import multiple_simulation #, multiple_mixture_simulation
+from hopfield import multiple_simulation
 
 parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 parser.add_argument("-N", type=int, default=1000, help="number of neurons")
