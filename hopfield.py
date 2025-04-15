@@ -8,7 +8,7 @@ The network dynamics are run for a specified number of steps, and the magnitude 
 """
 
 
-def sign(x):
+def sign(x): # i keep it because maybe i'll use it
     if x < 0:
         return -1
     if x > 0:
@@ -17,24 +17,14 @@ def sign(x):
         return 2 * (np.random.rand() < 0.5) - 1  # np.random.choice([-1, 1])
 
 
-def sample_mixture(a):
-    """
-    Sample a random number from the distribution:
-    p(ξ) = a/(2√2) * exp(-|ξ|/√2) + (1-a)/2 * [δ(ξ-1) + δ(ξ+1)]
-    """
-    u = np.random.rand()
-    if u < a:
-        return np.random.laplace(loc=0, scale=np.sqrt(2))
-    else:
-        return 2 * (np.random.rand() < 0.5) - 1  # np.random.choice([-1, 1])
-
-
 def extract_pattern(neurons_number, patterns_number, distribution_param):
-    """Sample a random number from the distribution: p(ξ) = a/(2√2) * exp(-|ξ|/√2) + (1-a)/2 * [δ(ξ-1) + δ(ξ+1)]"""
+    """Sample patterns_number random patterns such that 
+    every component is a number sampled from the distribution:
+    p(ξ) = a/(2√2) * exp(-|ξ|/√2) + (1-a)/2 * [δ(ξ-1) + δ(ξ+1)]"""
     size = (neurons_number, patterns_number)
     mask = np.random.rand(*size) < distribution_param
     laplace = np.random.laplace(loc=0, scale=np.sqrt(2), size=size)
-    delta = np.random.choice([-1.0, 1.0], size=size)
+    delta = np.random.choice([-1.0, 1.0], size=size) # maybe 2 * (np.random.rand() < 0.5) - 1 it's better
     return np.where(mask, laplace, delta)
 
 
@@ -61,9 +51,10 @@ def updated_value(temperature, local_field):
 
 
 def update_neurons(neurons, couplings, temperature):
-    neuron_picked = np.random.randint(neurons.size)
-    local_field = np.dot(couplings[neuron_picked, :], neurons)
-    neurons[neuron_picked] = updated_value(temperature, local_field)
+    for _ in range(neurons.size):
+        neuron_picked = np.random.randint(neurons.size)
+        local_field = np.dot(couplings[neuron_picked, :], neurons)
+        neurons[neuron_picked] = updated_value(temperature, local_field)
 
 
 def dynamic(neurons, couplings, patterns, steps, temperature):
