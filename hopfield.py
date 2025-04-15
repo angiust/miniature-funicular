@@ -42,6 +42,10 @@ def compute_mixture(patterns):
     return mixture
 
 
+def mixture_magnetization(neurons, mixture):
+    return np.average(neurons * mixture)
+
+
 def init_net_first_pattern(patterns):
     assert np.all(patterns[:,0] != 0), "sign of patterns should be non-zero"
     return np.sign(patterns[:, 0])
@@ -71,6 +75,12 @@ def dynamic(neurons, couplings, patterns, steps, temperature):
         yield first_pattern_magnetization(neurons, patterns)
 
 
+def mixture_dynamic(neurons, couplings, mixture, sweeps, temperature):
+    for _ in range(sweeps):
+        update_neurons(neurons, couplings, temperature)
+        yield mixture_magnetization(neurons, mixture)
+
+
 def bare_simulation(N, p, t_max, a, T):
     patterns = extract_pattern(N, p, a)
     couplings = compute_couplings(N, patterns)
@@ -84,11 +94,31 @@ def simulation(N, p, t_max, a, T):
     return bare_simulation(N, p, t_max, a, T)
 
 
+def mixture_simulation(N, p, sweep_max, a, T):
+    patterns = extract_pattern(N, p, a)
+    couplings = compute_couplings(N, patterns)
+    mixture = compute_mixture(patterns)
+    neurons = mixture
+
+    return np.fromiter(mixture_dynamic(neurons, couplings, mixture, sweep_max, T), float)
+
+
 def multiple_simulation(N, p, t_max, a, T, s):
     """run different simulation with resampling of the patterns
     and return the average magnetization"""
     average_magnetization = np.zeros(t_max)
     sampled_magnetization = np.array([simulation(N, p, t_max, a, T) for _ in range(s)])
+    average_magnetization = np.mean(sampled_magnetization, axis=0)
+    standard_deviation = np.std(sampled_magnetization, axis=0)
+    return np.column_stack((average_magnetization, standard_deviation))
+
+
+def multiple_mixture_simulation(N, p, sweep_max, a, T, s):
+    """run different simulation starting from the mixture,
+    with resampling of the patterns and 
+    return the average magnetization respect to the mixture"""
+    average_magnetization = np.zeros(t_max)
+    sampled_magnetization = np.array([mixture_simulation(N, p, sweep_max, a, T) for _ in range(s)])
     average_magnetization = np.mean(sampled_magnetization, axis=0)
     standard_deviation = np.std(sampled_magnetization, axis=0)
     return np.column_stack((average_magnetization, standard_deviation))
