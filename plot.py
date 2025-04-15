@@ -10,7 +10,7 @@ parser.add_argument("-i", "--input", type=str, default="-", help="name of the in
 arguments = parser.parse_args()
 
 filename = arguments.input if arguments.input != '-' else sys.stdin
-data = np.loadtxt(filename, delimiter=",")
+data = np.loadtxt(filename)
 
 # Extract time and magnetization
 time = np.arange(data.shape[0])
