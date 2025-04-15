@@ -81,33 +81,29 @@ def mixture_dynamic(neurons, couplings, mixture, sweeps, temperature):
         yield mixture_magnetization(neurons, mixture)
 
 
-def bare_simulation(N, p, t_max, a, T):
+def simulation(N, p, sweep_max, a, T):
     patterns = extract_pattern(N, p, a)
     couplings = compute_couplings(N, patterns)
     # assert np.max(np.abs(couplings)) < 1.0, "couplings should be less than 1"
     neurons = init_net_first_pattern(patterns)
 
-    return np.fromiter(dynamic(neurons, couplings, patterns, t_max, T), float)
-
-
-def simulation(N, p, t_max, a, T):
-    return bare_simulation(N, p, t_max, a, T)
+    return np.fromiter(dynamic(neurons, couplings, patterns, sweep_max, T), float)
 
 
 def mixture_simulation(N, p, sweep_max, a, T):
     patterns = extract_pattern(N, p, a)
     couplings = compute_couplings(N, patterns)
     mixture = compute_mixture(patterns)
-    neurons = mixture
+    neurons = np.copy(mixture)
 
     return np.fromiter(mixture_dynamic(neurons, couplings, mixture, sweep_max, T), float)
 
 
-def multiple_simulation(N, p, t_max, a, T, s):
+def multiple_simulation(N, p, sweep_max, a, T, s):
     """run different simulation with resampling of the patterns
     and return the average magnetization"""
-    average_magnetization = np.zeros(t_max)
-    sampled_magnetization = np.array([simulation(N, p, t_max, a, T) for _ in range(s)])
+    average_magnetization = np.zeros(sweep_max)
+    sampled_magnetization = np.array([simulation(N, p, sweep_max, a, T) for _ in range(s)])
     average_magnetization = np.mean(sampled_magnetization, axis=0)
     standard_deviation = np.std(sampled_magnetization, axis=0)
     return np.column_stack((average_magnetization, standard_deviation))
@@ -117,7 +113,7 @@ def multiple_mixture_simulation(N, p, sweep_max, a, T, s):
     """run different simulation starting from the mixture,
     with resampling of the patterns and 
     return the average magnetization respect to the mixture"""
-    average_magnetization = np.zeros(t_max)
+    average_magnetization = np.zeros(sweep_max)
     sampled_magnetization = np.array([mixture_simulation(N, p, sweep_max, a, T) for _ in range(s)])
     average_magnetization = np.mean(sampled_magnetization, axis=0)
     standard_deviation = np.std(sampled_magnetization, axis=0)
