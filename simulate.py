@@ -8,7 +8,7 @@ from hopfield import simulation, multiple_simulation
 parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 parser.add_argument("-N", type=int, default=1000, help="number of neurons")
 parser.add_argument("-p", type=int, default=8, help="number of patterns")
-parser.add_argument("-t", type=int, default=3000, help="number of temporal steps")
+parser.add_argument("-t", type=int, default=3000, help="number of sweeps")
 parser.add_argument("-a", type=float, default=0, help="parameter of the distribution of probability")
 parser.add_argument("-T", type=float, default=0, help="temperature of the system")
 parser.add_argument("-s", type=int, default=20, help="number of samples")
@@ -19,6 +19,7 @@ arguments = parser.parse_args()
 if arguments.seed is not None:
     np.random.seed(arguments.seed)
 
+"""
 evolution = simulation(
     N=arguments.N,
     p=arguments.p,
@@ -27,6 +28,7 @@ evolution = simulation(
     T=arguments.T
 )
 """
+
 multiple_evolution = multiple_simulation(
     N=arguments.N,
     p=arguments.p,
@@ -35,7 +37,8 @@ multiple_evolution = multiple_simulation(
     T=arguments.T,
     s=arguments.s
 )
-"""
-np.savetxt(sys.stdout, evolution, fmt=('%.4f'))
 
-#print(multiple_evolution)
+#np.savetxt(sys.stdout, evolution, fmt=('%.4f'))
+np.savetxt(sys.stdout, multiple_evolution, fmt=('%.4f'))
+
+# print(multiple_evolution)
