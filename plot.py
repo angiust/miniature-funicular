@@ -13,8 +13,8 @@ filename = arguments.input if arguments.input != '-' else sys.stdin
 data = np.loadtxt(filename, delimiter=",")
 
 # Extract time and magnetization
-time = data[:, 0]
-magnetization = data[:, 1]
+time = np.arange(data.shape[0])
+magnetization = data
 
 # Plot
 plt.figure(figsize=(8, 5))

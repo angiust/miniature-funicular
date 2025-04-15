@@ -36,6 +36,6 @@ multiple_evolution = multiple_simulation(
     s=arguments.s
 )
 """
-np.savetxt(sys.stdout, evolution, fmt=('%.f', '%.4f'), delimiter=',')
+np.savetxt(sys.stdout, evolution, fmt=('%.4f'), delimiter=',')
 
 #print(multiple_evolution)
