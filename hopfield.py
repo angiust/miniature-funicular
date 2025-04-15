@@ -71,18 +71,9 @@ def bare_simulation(N, p, t_max, a, T):
 
     return np.fromiter(dynamic(neurons, couplings, patterns, t_max, T), float)
 
-"""
-def wrap_into_array(t_max, magnetization):
-    dtype = [("t", int), ("magnetization", float)]
-    array = np.empty(t_max, dtype=dtype)
-    array["t"] = range(t_max)
-    array["magnetization"] = magnetization
-    return array
-"""
 
 def simulation(N, p, t_max, a, T):
     return bare_simulation(N, p, t_max, a, T)
-    #return wrap_into_array(t_max, evolution)
 
 
 def multiple_simulation(N, p, t_max, a, T, s):
