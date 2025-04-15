@@ -34,6 +34,14 @@ def compute_couplings(neurons_number, patterns):
     return couplings
 
 
+def compute_mixture(patterns):
+    if patterns.shape[1] < 3:
+        raise ValueError("Need at least 3 patterns to compute this mixture.")
+    mixture = np.sign(patterns[:, 0] + patterns[:, 1] + patterns[:, 2])
+    assert np.all(mixture != 0), "sign of mixture should be non-zero"
+    return mixture
+
+
 def init_net_first_pattern(patterns):
     assert np.all(patterns[:,0] != 0), "sign of patterns should be non-zero"
     return np.sign(patterns[:, 0])
