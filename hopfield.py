@@ -83,4 +83,4 @@ def multiple_simulation(N, p, t_max, a, T, s):
     sampled_magnetization = np.array([simulation(N, p, t_max, a, T) for _ in range(s)])
     average_magnetization = np.mean(sampled_magnetization, axis=0)
     standard_deviation = np.std(sampled_magnetization, axis=0)
-    return average_magnetization, standard_deviation
+    return np.column_stack((average_magnetization, standard_deviation))

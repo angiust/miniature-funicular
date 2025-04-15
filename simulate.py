@@ -29,7 +29,7 @@ evolution = simulation(
 )
 """
 
-multiple_evolution, standard_deviation = multiple_simulation(
+multiple_evolution = multiple_simulation(
     N=arguments.N,
     p=arguments.p,
     t_max=arguments.t,
@@ -38,7 +38,4 @@ multiple_evolution, standard_deviation = multiple_simulation(
     s=arguments.s
 )
 
-#np.savetxt(sys.stdout, evolution, fmt=('%.4f'))
-np.savetxt(sys.stdout, multiple_evolution, fmt=('%.4f'))
-
-print(standard_deviation)
+np.savetxt(sys.stdout, multiple_evolution, fmt=('%.4f', '%.4f'), delimiter=',')
