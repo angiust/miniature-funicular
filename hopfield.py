@@ -37,7 +37,7 @@ def compute_couplings(neurons_number, patterns):
 def compute_mixture(patterns):
     if patterns.shape[1] < 3:
         raise ValueError("Need at least 3 patterns to compute this mixture.")
-    mixture = np.sign(patterns[:, 0] + patterns[:, 1] + patterns[:, 2])
+    mixture = (patterns[:, 0] + patterns[:, 1] + patterns[:, 2])
     assert np.all(mixture != 0), "sign of mixture should be non-zero"
     return mixture
 
@@ -76,9 +76,9 @@ def simulation(N, p, sweep_max, a, T, mixture):
     couplings = compute_couplings(N, patterns)
     # assert np.max(np.abs(couplings)) < 1.0, "couplings should be less than 1"
     if mixture:
-        mixture = compute_mixture(patterns)
-        neurons = np.copy(mixture)
-        respect_to_magnetization = mixture
+        mixture_vector = compute_mixture(patterns)
+        neurons = np.sign(mixture_vector)
+        respect_to_magnetization = mixture_vector
     else:
         neurons = init_net_first_pattern(patterns)
         respect_to_magnetization = patterns[:, 0]
