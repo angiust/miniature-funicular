@@ -6,3 +6,8 @@ venv/
 .*~
 *.csv
 .idea/
+style.py
+*.zip
+*/
+*.png
+
