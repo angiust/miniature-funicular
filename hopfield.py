@@ -42,8 +42,8 @@ def compute_mixture(patterns):
     return mixture
 
 
-def magnetization(neurons, respect_to_magnetization):
-    return np.average(neurons * respect_to_magnetization)
+def magnetization(neurons, patterns):
+    return np.average(neurons[:, None] * patterns, axis=0)
 
 
 def init_net_first_pattern(patterns):
@@ -65,10 +65,10 @@ def update_neurons(neurons, couplings, temperature):
         neurons[neuron_picked] = updated_value(temperature, local_field)
 
 
-def dynamic(neurons, couplings, respect_to_magnetization, sweeps, temperature):
+def dynamic(neurons, couplings, patterns, sweeps, temperature):
     for _ in range(sweeps):
         update_neurons(neurons, couplings, temperature)
-        yield magnetization(neurons, respect_to_magnetization)
+        yield magnetization(neurons, patterns)
 
 
 def simulation(N, p, sweep_max, a, T, mixture):
@@ -78,12 +78,10 @@ def simulation(N, p, sweep_max, a, T, mixture):
     if mixture:
         mixture_vector = compute_mixture(patterns)
         neurons = np.sign(mixture_vector)
-        respect_to_magnetization = mixture_vector
     else:
         neurons = init_net_first_pattern(patterns)
-        respect_to_magnetization = patterns[:, 0]
 
-    return np.fromiter(dynamic(neurons, couplings, respect_to_magnetization, sweep_max, T), float)
+    return np.fromiter(dynamic(neurons, couplings, patterns, sweep_max, T), dtype = np.dtype((float, p)))
 
 
 def multiple_simulation(N, p, sweep_max, a, T, s, mixture):
@@ -91,7 +89,6 @@ def multiple_simulation(N, p, sweep_max, a, T, s, mixture):
     and return the average magnetization, it can start from the first pattern
     or from the mixture and return the average magnetization respectevely 
     from the first pattern or from the mixture"""
-    average_magnetization = np.zeros(sweep_max)
     sampled_magnetization = np.array([simulation(N, p, sweep_max, a, T, mixture) for _ in range(s)])
     average_magnetization = np.mean(sampled_magnetization, axis=0)
     standard_deviation = np.std(sampled_magnetization, axis=0)

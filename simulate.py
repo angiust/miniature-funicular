@@ -32,4 +32,8 @@ multiple_evolution = multiple_simulation(
     mixture=arguments.mix
 )
 
+print(multiple_evolution.shape)
+
+"""
 np.savetxt(sys.stdout, multiple_evolution, fmt=('%.4f', '%.4f'), delimiter=',')
+"""
