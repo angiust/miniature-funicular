@@ -9,7 +9,7 @@ from hopfield import multiple_simulation
 
 parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 parser.add_argument("-N", type=int, default=1000, help="number of neurons")
-parser.add_argument("-p", type=int, default=8, help="number of patterns")
+parser.add_argument("-p", type=int, default=9, help="number of patterns")
 parser.add_argument("-t", type=int, default=3000, help="number of sweeps")
 parser.add_argument("-a", type=float, default=0, help="parameter of the distribution of probability")
 parser.add_argument("-T", type=float, default=0, help="temperature of the system")
@@ -32,8 +32,6 @@ multiple_evolution = multiple_simulation(
     mixture=arguments.mix
 )
 
-print(multiple_evolution.shape)
-
-"""
-np.savetxt(sys.stdout, multiple_evolution, fmt=('%.4f', '%.4f'), delimiter=',')
-"""
+p=arguments.p
+header = ",".join([f"m_{i+1}" for i in range(p)] + [f"std_{i+1}" for i in range(p)])
+np.savetxt(sys.stdout, multiple_evolution, delimiter=",", fmt="%.5f", header=header)

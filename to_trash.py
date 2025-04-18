@@ -17,3 +17,6 @@ plt.grid(True)
 plt.tight_layout()
 plt.show()
 """
+"""
+np.savetxt(sys.stdout, multiple_evolution, fmt=('%.4f', '%.4f'), delimiter=',')
+"""
