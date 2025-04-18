@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 
 import sys
-
 import numpy as np
 import matplotlib.pyplot as plt
 import argparse
@@ -16,15 +15,23 @@ arguments = parser.parse_args()
 filename = arguments.input if arguments.input != '-' else sys.stdin
 data = np.loadtxt(filename, delimiter=",")
 
-# Extract time and magnetization
 time = np.arange(data.shape[0])
-average_magnetization = data[:, 0]
-std_deviation = data[:, 1]
+num_columns = data.shape[1]
 
-plt.figure(figsize=(8, 5))
-plt.plot(time, average_magnetization, label='Magnetization', color='blue')
-plt.fill_between(time, average_magnetization - std_deviation, average_magnetization + std_deviation, color='blue', alpha=0.2, label='Std dev')
-plt.title(f"Magnetization vs Time at {arguments.title}")
+# Each magnetization and std pair: m1, std1, m2, std2, ..., mp, stdp
+num_pairs = num_columns // 2
+
+plt.figure(figsize=(10, 6))
+
+colors = plt.cm.viridis(np.linspace(0, 1, num_pairs))
+
+for i in range(num_pairs):
+    m = data[:, i]
+    std = data[:, num_pairs + i]
+    plt.plot(time, m, label=f"m_{i+1}", color=colors[i])
+    plt.fill_between(time, m - std, m + std, color=colors[i], alpha=0.2)
+
+plt.title(f"Magnetization vs Time {arguments.title}")
 plt.xlabel("Time Step")
 plt.ylabel("Magnetization")
 plt.grid(True)
