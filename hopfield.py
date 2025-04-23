@@ -1,5 +1,4 @@
 import numpy as np
-from typing import Literal
 
 """
 This code implements a Hopfield network with a mixture of distributions for the patterns.
@@ -97,10 +96,8 @@ def simulation_all_pattern_init(N, p, sweep_max, a, T):
     each pattern"""
     patterns = extract_pattern(N, p, a)
     couplings = compute_couplings(N, patterns)
-    for i in range(p):
-        neurons = init_net_on_a_pattern(patterns, i)
-        yield dynamic(neurons, couplings, patterns, sweep_max, T)
-    return np.array(story)
+    story = [dynamic(init_net_on_a_pattern(patterns, i), couplings, patterns, sweep_max, T) for i in range(p)]
+    return np.fromiter(story, dtype = np.dtype((p, float, p)))
 
 
 def multiple_simulation(N, p, sweep_max, a, T, s, mixture):
