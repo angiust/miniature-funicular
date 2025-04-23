@@ -8,7 +8,7 @@ The network dynamics are run for a specified number of steps, and the magnitude 
 """
 
 
-def sign(x): # i keep it because maybe i'll use it
+def sign(x):  # i keep it because maybe i'll use it
     if x < 0:
         return -1
     if x > 0:
@@ -18,13 +18,15 @@ def sign(x): # i keep it because maybe i'll use it
 
 
 def extract_pattern(neurons_number, patterns_number, distribution_param):
-    """Sample patterns_number random patterns such that 
+    """Sample patterns_number random patterns such that
     every component is a number sampled from the distribution:
     p(ξ) = a/(2√2) * exp(-|ξ|/√2) + (1-a)/2 * [δ(ξ-1) + δ(ξ+1)]"""
     size = (neurons_number, patterns_number)
     mask = np.random.rand(*size) < distribution_param
     laplace = np.random.laplace(loc=0, scale=np.sqrt(2), size=size)
-    delta = np.random.choice([-1.0, 1.0], size=size) # maybe 2 * (np.random.rand() < 0.5) - 1 it's better
+    delta = np.random.choice(
+        [-1.0, 1.0], size=size
+    )  # maybe 2 * (np.random.rand() < 0.5) - 1 it's better
     return np.where(mask, laplace, delta)
 
 
@@ -37,7 +39,7 @@ def compute_couplings(neurons_number, patterns):
 def compute_mixture(patterns):
     if patterns.shape[1] < 3:
         raise ValueError("Need at least 3 patterns to compute this mixture.")
-    mixture = (patterns[:, 0] + patterns[:, 1] + patterns[:, 2])
+    mixture = patterns[:, 0] + patterns[:, 1] + patterns[:, 2]
     assert np.all(mixture != 0), "sign of mixture should be non-zero"
     return mixture
 
@@ -49,7 +51,9 @@ def magnetization(neurons, patterns):
 def init_net_on_a_pattern(patterns, which_pattern):
     if which_pattern < 0 & patterns.shape[1] < which_pattern + 2:
         raise ValueError("Choosen a pattern that doesn't exist")
-    assert np.all(patterns[:,which_pattern] != 0), "sign of patterns should be non-zero"
+    assert np.all(patterns[:, which_pattern] != 0), (
+        "sign of patterns should be non-zero"
+    )
     return np.sign(patterns[:, which_pattern])
 
 
@@ -87,7 +91,9 @@ def simulation(N, p, sweep_max, a, T, mixture):
     # assert np.max(np.abs(couplings)) < 1.0, "couplings should be less than 1"
     neurons = init_neurons(patterns, mixture)
 
-    return np.fromiter(dynamic(neurons, couplings, patterns, sweep_max, T), dtype = np.dtype((float, p)))
+    return np.fromiter(
+        dynamic(neurons, couplings, patterns, sweep_max, T), dtype=np.dtype((float, p))
+    )
 
 
 def simulation_all_pattern_init(N, p, sweep_max, a, T):
@@ -96,11 +102,22 @@ def simulation_all_pattern_init(N, p, sweep_max, a, T):
     each pattern"""
     patterns = extract_pattern(N, p, a)
     couplings = compute_couplings(N, patterns)
-    #story = []
-    #for i in range(p):
+    # story = []
+    # for i in range(p):
     #    neurons = init_net_on_a_pattern(patterns, i)
     #    story.append(np.fromiter(dynamic(neurons, couplings, patterns, sweep_max, T), dtype = np.dtype((float, p))))
-    story = [list(dynamic(init_net_on_a_pattern(patterns, i), couplings, patterns, sweep_max, T)) for i in range(p)]
+    story = [
+        list(
+            dynamic(
+                neurons=init_net_on_a_pattern(patterns, i),
+                couplings=couplings,
+                patterns=patterns,
+                sweeps=sweep_max,
+                temperature=T,
+            )
+        )
+        for i in range(p)
+    ]
 
     return np.array(story)
 
@@ -108,9 +125,11 @@ def simulation_all_pattern_init(N, p, sweep_max, a, T):
 def multiple_simulation(N, p, sweep_max, a, T, s, mixture):
     """run different simulation with resampling of the patterns
     and return the average magnetization, it can start from the first pattern
-    or from the mixture and return the average magnetization respectevely 
+    or from the mixture and return the average magnetization respectevely
     from the first pattern or from the mixture"""
-    sampled_magnetization = np.array([simulation(N, p, sweep_max, a, T, mixture) for _ in range(s)])
+    sampled_magnetization = np.array(
+        [simulation(N, p, sweep_max, a, T, mixture) for _ in range(s)]
+    )
     average_magnetization = np.mean(sampled_magnetization, axis=0)
     standard_deviation = np.std(sampled_magnetization, axis=0)
     return np.column_stack((average_magnetization, standard_deviation))
