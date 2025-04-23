@@ -54,6 +54,14 @@ def init_net_on_a_pattern(patterns, which_pattern):
     return np.sign(patterns[:, which_pattern])
 
 
+def init_neurons(patterns, mixture):
+    if mixture:
+        mixture_vector = compute_mixture(patterns)
+        return np.sign(mixture_vector)
+    else:
+        return init_net_on_a_pattern(patterns, 0)
+
+
 def updated_value(temperature, local_field):
     if temperature == 0:
         assert local_field != 0, "sign of 0 local field is concerning!"
@@ -74,27 +82,25 @@ def dynamic(neurons, couplings, patterns, sweeps, temperature):
         yield magnetization(neurons, patterns)
 
 
-def simulation(N, p, sweep_max, a, T, type: Literal['mixture', 'first_pattern', 'every_pattern']):
+def simulation(N, p, sweep_max, a, T, mixture):
+    patterns = extract_pattern(N, p, a)
+    couplings = compute_couplings(N, patterns)
+    # assert np.max(np.abs(couplings)) < 1.0, "couplings should be less than 1"
+    neurons = init_neurons(patterns, mixture)
+
+    return np.fromiter(dynamic(neurons, couplings, patterns, sweep_max, T), dtype = np.dtype((float, p)))
+
+
+def simulation_all_pattern_init(N, p, sweep_max, a, T):
     """run a simulation with with one sample of the patterns
     and return the magnetization at each sweep and respect
     each pattern"""
     patterns = extract_pattern(N, p, a)
     couplings = compute_couplings(N, patterns)
-    # assert np.max(np.abs(couplings)) < 1.0, "couplings should be less than 1"
-    if type == 'mixture':
-        mixture_vector = compute_mixture(patterns)
-        neurons = np.sign(mixture_vector)
-    elif type == 'first_pattern':
-        neurons = init_net_on_a_pattern(patterns, 0)
-    elif type == 'every_pattern':
-        story = []
-        for i in range(p):
-            neurons = init_net_on_a_pattern(patterns, i)
-            particular_story = np.array(list(dynamic(neurons, couplings, patterns, sweep_max, T)))
-            story.append(particular_story)
-        return np.array(story)
-
-    return np.fromiter(dynamic(neurons, couplings, patterns, sweep_max, T), dtype = np.dtype((float, p)))
+    for i in range(p):
+        neurons = init_net_on_a_pattern(patterns, i)
+        yield dynamic(neurons, couplings, patterns, sweep_max, T)
+    return np.array(story)
 
 
 def multiple_simulation(N, p, sweep_max, a, T, s, mixture):
