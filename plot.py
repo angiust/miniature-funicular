@@ -18,7 +18,7 @@ data = np.loadtxt(filename, delimiter=",")
 time = np.arange(data.shape[0])
 num_columns = data.shape[1]
 
-# Each magnetization and std pair: m1, std1, m2, std2, ..., mp, stdp
+# each magnetization and std pair: m1, std1, m2, std2, ..., mp, stdp
 num_pairs = num_columns // 2
 
 plt.figure(figsize=(10, 6))
