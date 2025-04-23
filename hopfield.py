@@ -1,4 +1,5 @@
 import numpy as np
+from typing import Literal
 
 """
 This code implements a Hopfield network with a mixture of distributions for the patterns.
@@ -46,9 +47,11 @@ def magnetization(neurons, patterns):
     return np.average(neurons[:, None] * patterns, axis=0)
 
 
-def init_net_first_pattern(patterns):
-    assert np.all(patterns[:,0] != 0), "sign of patterns should be non-zero"
-    return np.sign(patterns[:, 0])
+def init_net_on_a_pattern(patterns, which_pattern):
+    if which_pattern < 0 & patterns.shape[1] < which_pattern + 2:
+        raise ValueError("Choosen a pattern that doesn't exist")
+    assert np.all(patterns[:,which_pattern] != 0), "sign of patterns should be non-zero"
+    return np.sign(patterns[:, which_pattern])
 
 
 def updated_value(temperature, local_field):
@@ -71,18 +74,25 @@ def dynamic(neurons, couplings, patterns, sweeps, temperature):
         yield magnetization(neurons, patterns)
 
 
-def simulation(N, p, sweep_max, a, T, mixture):
+def simulation(N, p, sweep_max, a, T, type: Literal['mixture', 'first_pattern', 'every_pattern']):
     """run a simulation with with one sample of the patterns
     and return the magnetization at each sweep and respect
     each pattern"""
     patterns = extract_pattern(N, p, a)
     couplings = compute_couplings(N, patterns)
     # assert np.max(np.abs(couplings)) < 1.0, "couplings should be less than 1"
-    if mixture:
+    if type == 'mixture':
         mixture_vector = compute_mixture(patterns)
         neurons = np.sign(mixture_vector)
-    else:
-        neurons = init_net_first_pattern(patterns)
+    elif type == 'first_pattern':
+        neurons = init_net_on_a_pattern(patterns, 0)
+    elif type == 'every_pattern':
+        story = []
+        for i in range(p):
+            neurons = init_net_on_a_pattern(patterns, i)
+            particular_story = np.array(list(dynamic(neurons, couplings, patterns, sweep_max, T)))
+            story.append(particular_story)
+        return np.array(story)
 
     return np.fromiter(dynamic(neurons, couplings, patterns, sweep_max, T), dtype = np.dtype((float, p)))
 
