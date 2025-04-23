@@ -72,6 +72,9 @@ def dynamic(neurons, couplings, patterns, sweeps, temperature):
 
 
 def simulation(N, p, sweep_max, a, T, mixture):
+    """run a simulation with with one sample of the patterns
+    and return the magnetization at each sweep and respect
+    each pattern"""
     patterns = extract_pattern(N, p, a)
     couplings = compute_couplings(N, patterns)
     # assert np.max(np.abs(couplings)) < 1.0, "couplings should be less than 1"
