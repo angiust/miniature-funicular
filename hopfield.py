@@ -96,8 +96,13 @@ def simulation_all_pattern_init(N, p, sweep_max, a, T):
     each pattern"""
     patterns = extract_pattern(N, p, a)
     couplings = compute_couplings(N, patterns)
-    story = [dynamic(init_net_on_a_pattern(patterns, i), couplings, patterns, sweep_max, T) for i in range(p)]
-    return np.fromiter(story, dtype = np.dtype((p, float, p)))
+    #story = []
+    #for i in range(p):
+    #    neurons = init_net_on_a_pattern(patterns, i)
+    #    story.append(np.fromiter(dynamic(neurons, couplings, patterns, sweep_max, T), dtype = np.dtype((float, p))))
+    story = [list(dynamic(init_net_on_a_pattern(patterns, i), couplings, patterns, sweep_max, T)) for i in range(p)]
+
+    return np.array(story)
 
 
 def multiple_simulation(N, p, sweep_max, a, T, s, mixture):
