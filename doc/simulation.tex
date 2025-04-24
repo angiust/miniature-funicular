@@ -51,13 +51,14 @@ Estraggo un sample di $p$ pattern $\xi^\mu$ con $\mu=1\ldots p$, i.i.d. secondo 
 \[
  p(\xi_i^\mu) = \frac{a}{2\sqrt{2}} e^{-|\xi|/\sqrt{2}} + \frac{1-a}{2} \left[ \delta(\xi-1) + \delta(\xi+1) \right].
 \]
-Sulla base di questi pattern sono determinati i coupling $J_{ij}$ (usando l'eq. \ref{eq:hebb}), inizializzo il sistema sul primo pattern, faccio evolvere il sistema per un tempo $t_{max}$. Per ogni istante di tempo calcolo la magnetizzazione $m_1$ rispetto al primo pattern:
+Sulla base di questi pattern sono determinati i coupling $J_{ij}$ (usando l'eq. \ref{eq:hebb}), inizializzo il sistema sul primo pattern, faccio evolvere il sistema per un tempo $t_{max}$. Per ogni istante di tempo calcolo le magnetizzazioni $m_i$ rispetto all'$i$-esimo pattern:
 \[
- m_1(t)=\frac{1}{N}\sum_{i=1}^N \xi_i^1 s_i(t) .
+ m_i(t)=\frac{1}{N}\sum_{j=1}^N \xi_j^i s_j(t) .
 \]
-Mi stampo e plotto la magnetizzazione in funzione del tempo.
+E mi calcolo l'energia usando l'eq. \ref{eq:ham}.
+Mi stampo e plotto le magnetizzazioni e l'energia in funzione del tempo.
 
-Ripeto per un certo numero di volte da estrazione dei pattern a produzione di magnetizzazione in funzione del tempo, poi faccio la media di $m_1$ rispetto ai vari sample estratti.
+Ripeto per un certo numero di volte da estrazione dei pattern a produzione di magnetizzazione in funzione del tempo, poi calcolo la media e la deviazione standard delle $m_i$ e dell'energia rispetto ai vari sample estratti.
 
 \subsection{Input, Output, Execution path}
 
@@ -132,6 +133,7 @@ A three indices array: one for which pattern is the initial state of the system,
 When is performed the average respect to various samples, the magnetization respect to the first pattern is the unique mean magnetization that is not around zero is $m_1$, but the std of the others magnetizations are very high when $a$ is large enough, so we hypothize that we see zero magnetization due to the averaging. To delve into this we can obtain the hystograms of the magnetizations.
 
 \section{Fifth simulation - random init}
+
 We started at a random point and i see if the system finishes in a mixture, do multiple run keeping fixed the patterns sampled and varying the random starting point, and varying the parameter $a$. We'll hope that if $a$ is large enough it will finishes in a mixture.
 
 
