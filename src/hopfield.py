@@ -45,7 +45,13 @@ def compute_mixture(patterns):
 
 
 def magnetization(neurons, patterns):
-    return np.average(neurons[:, None] * patterns, axis=0)
+    N = neurons.shape[0]
+    magnetization = (patterns.T @ neurons) / N
+    return np.abs(magnetization)
+
+
+def energy(neurons, couplings):
+    return -0.5 * neurons @ couplings @ neurons
 
 
 def init_net_on_a_pattern(patterns, which_pattern):
@@ -82,7 +88,9 @@ def update_neurons(neurons, couplings, temperature):
 def dynamic(neurons, couplings, patterns, sweeps, temperature):
     for _ in range(sweeps):
         update_neurons(neurons, couplings, temperature)
-        yield magnetization(neurons, patterns)
+        yield np.append(
+            magnetization(neurons, patterns), energy(neurons, couplings)
+        )  # shape (p + 1,)
 
 
 def simulation(N, p, sweep_max, a, T, mixture):
@@ -92,8 +100,9 @@ def simulation(N, p, sweep_max, a, T, mixture):
     neurons = init_neurons(patterns, mixture)
 
     return np.fromiter(
-        dynamic(neurons, couplings, patterns, sweep_max, T), dtype=np.dtype((float, p))
-    )
+        dynamic(neurons, couplings, patterns, sweep_max, T),
+        dtype=np.dtype((float, p + 1)),
+    ) # shape (sweep_max, p + 1)
 
 
 def simulation_all_pattern_init(N, p, sweep_max, a, T):
@@ -119,7 +128,7 @@ def simulation_all_pattern_init(N, p, sweep_max, a, T):
         for i in range(p)
     ]
 
-    return np.array(story)
+    return np.array(story) # shape (p, sweep_max, p + 1)
 
 
 def multiple_simulation(N, p, sweep_max, a, T, s, mixture):

@@ -2,8 +2,11 @@
 
 import argparse
 import sys
+import os
 
 import numpy as np
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'src')))
 
 from hopfield import simulation_all_pattern_init
 
@@ -25,11 +28,11 @@ multiple_evolution = simulation_all_pattern_init(
     T=arguments.T
 )
 
-# multiple_evolution shape = (p, t, p)
+# multiple_evolution shape = (p, t, p + 1)
 
 p=arguments.p
 
-# reshape to (t, p * p) so each column block is the evolution of one pattern
+# reshape to (t, p * (p+1) ) so each column block is the evolution of one pattern
 reshaped = multiple_evolution.transpose(1, 0, 2).reshape(arguments.t, -1)
 
 # create header
