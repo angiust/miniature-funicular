@@ -89,7 +89,7 @@ Ripeto per un certo numero di volte da estrazione dei pattern a produzione di ma
 Come la prima ma partendo da una mistura (continua) e calcolando la magnetizzazione rispetto a tale mistura.
 Nota: è normale esca la magnetizzazione più grande di 1 perché calcoliamo la magnetizzazione rispetto a cose continue.
 
-\section{Terza simulazione - one sample every pattern inizialization}
+\section{Terza simulazione - one sample every pattern init}
 
 Now we can keep track of the module of the magnetization (becaus e the system has a $\mathbb{Z}_2$ simmetry) respect to every pattern and the energy (via eq. \ref{eq:ham}), we perform the simulation with only one sample, but we perform a simulation starting in every pattern.
 
@@ -107,25 +107,32 @@ For the sake of simplicity we firstly run the simulation at zero temperature, so
 \begin{itemize}
 \item $N$, number of neurons, positive integer, default value 1000.
 \item $p$, number of patterns, positive integer, default value 9.
+\item $sweep_{max}$, ``time'' evolution of the system, for now 100, positive integer.
 \item $a$, parameter that determines the distribution, real number between 0 and 1.
 \item $T$, temperature, we are interested in values near 0, for now we will fix it at zero, non negative real number.
-\item $sweep_{max}$, ``time'' evolution of the system, for now 100, positive integer.
 \end{itemize}
 \textbf{Output:}
-A three indices array: one for which pattern is the initial state of the system, one for the time express in term of sweeps, one for the magnetization which respect to
+A three indices array: one for which pattern is the initial state of the system, one for the time express in term of sweeps, one for the magnetization which respect to and the energy of the system.
 
 \subsubsection{IO - run}
 \begin{itemize}
  \item[Input:] N, p, sweeps, a, T.
- \item[Output:] A csv file with in every column a magnetization respect to a pattern, starting from a pattern, and in every row the evolution time.
+ \item[Output:] A csv file with in every column a magnetization respect to a pattern and the energy, starting from a pattern, and in every row the evolution time.
 \end{itemize}
 
 \subsubsection{IO - plot}
 \begin{itemize}
- \item[Input:] A csv file with in every column a magnetization respect to a pattern, starting from a pattern, and in every row the evolution time.
- \item[Output:] $p$ plots, for every starting point, i.e. every pattern, the temporal evolution of every magnetization.
+ \item[Input:] A csv file with in every column a magnetization respect to a pattern or the energy, starting from a pattern, and in every row the evolution time. Its optional to give the input path or the output path; if input it is not given, it will take from the stdin; if output it is not given it will show the plot.
+ \item[Output:] $p$ plots, for every starting point, i.e. every pattern, the temporal evolution of every magnetization and of the energy. Depending on the input the output will be showen or saved.
 \end{itemize}
 
+\section{Fourth simulation - hystograms magn one pattern init}
+
+\subsection{Motivation}
+When is performed the average respect to various samples, the magnetization respect to the first pattern is the unique mean magnetization that is not around zero is $m_1$, but the std of the others magnetizations are very high when $a$ is large enough, so we hypothize that we see zero magnetization due to the averaging. To delve into this we can obtain the hystograms of the magnetizations.
+
+\section{Fifth simulation - random init}
+We started at a random point and i see if the system finishes in a mixture, do multiple run keeping fixed the patterns sampled and varying the random starting point, and varying the parameter $a$. We'll hope that if $a$ is large enough it will finishes in a mixture.
 
 
 \printbibliography
