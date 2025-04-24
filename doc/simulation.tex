@@ -1,0 +1,100 @@
+\documentclass[a4paper,10pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{geometry}
+\usepackage[backend=biber]{biblatex} %Imports biblatex package
+\addbibresource{bibliography.bib} %Import the bibliography file
+
+%opening
+\title{Simulazione}
+\author{angelo}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+Simulazione modello di Hopfield variando la distribuzione dei pattern e la temperatura.
+\end{abstract}
+
+\section*{Introduzione}
+
+Devo fare la seguente simulazione. Il mio modello è composto da $N$ neuroni $s_i$ (con $i=1\ldots N$) il cui stato in ogni istante è un elemento di $\{-1,+1 \}$, da $p$ pattern $\xi^\mu$ (con $\mu=1\ldots p$) che sono vettori in $\mathbb{R}^N$, estratti secondo una distribuzione di probabilità, e da dei coupling $J_{ij}$ per $i\neq j$ che sono numeri reali e dipendono dai pattern secondo la regola di Hebb:
+\begin{equation}
+ J_{ij}=\frac{1}{N}\sum_{\mu = 0}^p \xi_i^\mu \xi_j^\mu \ ,\ i\neq j .
+ \label{eq:hebb}
+\end{equation}
+Notiamo che i coupling dipendono dall'estrazione iniziale dei pattern e da lì sono fissati.
+
+L'energia di una configurazione è definita dalla seguente hamiltoniana:
+\[
+ H(\underline{s}) = -\frac{1}{2} \sum_{i\neq j} J_{ij} s_i s_j\ .
+\]
+\`{E} un sistema dinamico discreto che si muove secondo una dinamica di Glauber \cite{10.1063/1.1703954} con update sequenziale: in ogni step temporale viene scelto un neurone a caso e con la seguente probabilità cambierà valore (flipperà) o meno:
+\[
+ P(s_i(t+1)=s) = \frac{1 + s \tanh (\beta \phi_i(\underline{s}(t)))}{2} ,
+\]
+dove $\phi_i(\underline{s}(t))$ è il campo locale in $i$ al tempo $t$ è definito da:
+\[
+ \phi_i(\underline{s}(t)) = \sum_{j=1,j\neq i}^N J_{ij}s_j(t) ;
+\]
+e  $\beta = 1/T$ è l'inverso della temperatura $T$, che è un altro parametro del sistema ed è un numero reale non negativo. In particolare ci interessano i casi di temperatura nulla, vicino allo zero, temperatura critica e vicino alla temperatura critica
+
+\section{Prima simulazione}
+
+Estraggo un sample di $p$ pattern $\xi^\mu$ con $\mu=1\ldots p$, i.i.d. secondo la seguente distribuzione dipendende dal parametro $a$:
+\[
+ P(\xi^\mu)=\prod_{i=1}^N p(\xi_i^\mu),
+\]
+\[
+ p(\xi_i^\mu) = \frac{a}{2\sqrt{2}} e^{-|\xi|/\sqrt{2}} + \frac{1-a}{2} \left[ \delta(\xi-1) + \delta(\xi+1) \right].
+\]
+Sulla base di questi pattern sono determinati i coupling $J_{ij}$, inizializzo il sistema sul primo pattern, faccio evolvere il sistema per un tempo $t_{max}$. Per ogni istante di tempo calcolo la magnetizzazione $m_1$ rispetto al primo pattern:
+\[
+ m_1(t)=\frac{1}{N}\sum_{i=1}^N \xi_i^1 s_i(t) .
+\]
+Mi stampo e plotto la magnetizzazione in funzione del tempo.
+
+Ripeto per un certo numero di volte da estrazione dei pattern a produzione di magnetizzazione in funzione del tempo, poi faccio la media di $m_1$ rispetto ai vari sample estratti.
+
+\subsection{Input, Output, Execution path}
+
+\textbf{Input}: \begin{itemize}
+\item $N$, è un numero intero positivo. Inizialmente provo con 1000; andrebbero fatte almeno due simulazioni con due valori diversi, magari uno il doppio dell'altro per motivi di scaling.
+\item $p$, è un numero intero positivo. Inizio con 9 per essere nel limite di carico nullo (è minore di $1\%N=10$) e avere un numero dispari di pattern.
+\item $a$, parametro da cui dipende la distribuzione dei pattern, è un numero reale tra 0 e 1.
+\item $T$, la temperatura, un numero reale non nullo, ci interessano i valori vicino a 0 e alla temperatura critica.
+\item $t_{max}$, per quanti sweep far evolvere il sistema, è un numero intero positivo. Inizio con $100$, ma devo guardare se la magnetizzazione circa smette di cambiare dopo $N$ step, in tal caso posso assumere che il sistema ha termalizzato.
+\item $s$, il numero di sample dei pattern e la conseguente simulazione (stabilità primo pattern) da fare, è un numero intero positivo. Inizio con $20$.                                                                                                                                                                                                                                             \end{itemize}
+
+
+\textbf{Output}:
+\begin{itemize}
+ %\item $m_1(t)$: magnetizzazione del primo pattern in funzione del tempo per ogni sample, in un formato CSV su due colonne: nella prima un numero progressivo che indica il tempo t, nella seconda un numero reale che indica $m_1(t)$.
+ \item $(\overline{m_1(t)}, std(m_1(t)))$: media, rispetto ai vari sample, delle magnetizzazione del primo pattern in funzione del tempo, in un in un formato CSV su due colonne: nella prima un numero reale che indica $\overline{m_1(t)}$, nella seconda un numero reale che indica $std(m_1(t)))$.
+\end{itemize}
+
+\textbf{Execution path}
+\begin{enumerate}
+% \item da input a elenco $m_1(t)$ per sample.
+ \item da input a elenco $(\overline{m_1(t)}, std(m_1(t)))$.
+% \item da elenco $m_1(t)$ a plot.
+ \item da elenco $(\overline{m_1(t)}, std(m_1(t)))$ a plot.
+\end{enumerate}
+
+\section{Seconda simulazione draft}
+
+Come la prima ma partendo da una mistura (continua) e calcolando la magnetizzazione rispetto a tale mistura.
+Nota: è normale esca la magnetizzazione più grande di 1 perché calcoliamo la magnetizzazione rispetto a cose continue.
+
+\section{Terza simulazione}
+
+
+
+
+
+
+\printbibliography
+
+\end{document}

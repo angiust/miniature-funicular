@@ -8,6 +8,17 @@ venv/
 .idea/
 style.py
 *.zip
-*/
+old_output/
+outputs/
 *.png
-
+# LaTeX files
+*blx.bib
+*.aux
+*.bbl
+*.bcf
+*.blg
+*.dvi
+*.log
+*.pdf
+*.xml
+*.gz
