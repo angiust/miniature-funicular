@@ -28,9 +28,10 @@ Devo fare la seguente simulazione. Il mio modello è composto da $N$ neuroni $s_
 Notiamo che i coupling dipendono dall'estrazione iniziale dei pattern e da lì sono fissati.
 
 L'energia di una configurazione è definita dalla seguente hamiltoniana:
-\[
+\begin{equation}
  H(\underline{s}) = -\frac{1}{2} \sum_{i\neq j} J_{ij} s_i s_j\ .
-\]
+ \label{eq:ham}
+\end{equation}
 \`{E} un sistema dinamico discreto che si muove secondo una dinamica di Glauber \cite{10.1063/1.1703954} con update sequenziale: in ogni step temporale viene scelto un neurone a caso e con la seguente probabilità cambierà valore (flipperà) o meno:
 \[
  P(s_i(t+1)=s) = \frac{1 + s \tanh (\beta \phi_i(\underline{s}(t)))}{2} ,
@@ -50,7 +51,7 @@ Estraggo un sample di $p$ pattern $\xi^\mu$ con $\mu=1\ldots p$, i.i.d. secondo 
 \[
  p(\xi_i^\mu) = \frac{a}{2\sqrt{2}} e^{-|\xi|/\sqrt{2}} + \frac{1-a}{2} \left[ \delta(\xi-1) + \delta(\xi+1) \right].
 \]
-Sulla base di questi pattern sono determinati i coupling $J_{ij}$, inizializzo il sistema sul primo pattern, faccio evolvere il sistema per un tempo $t_{max}$. Per ogni istante di tempo calcolo la magnetizzazione $m_1$ rispetto al primo pattern:
+Sulla base di questi pattern sono determinati i coupling $J_{ij}$ (usando l'eq. \ref{eq:hebb}), inizializzo il sistema sul primo pattern, faccio evolvere il sistema per un tempo $t_{max}$. Per ogni istante di tempo calcolo la magnetizzazione $m_1$ rispetto al primo pattern:
 \[
  m_1(t)=\frac{1}{N}\sum_{i=1}^N \xi_i^1 s_i(t) .
 \]
@@ -90,7 +91,7 @@ Nota: è normale esca la magnetizzazione più grande di 1 perché calcoliamo la 
 
 \section{Terza simulazione - one sample every pattern inizialization}
 
-Now we can keep track of the magnetization respect to every pattern and the energy, we perform the simulation with only one sample, but we perform a simulation starting in every pattern.
+Now we can keep track of the module of the magnetization (becaus e the system has a $\mathbb{Z}_2$ simmetry) respect to every pattern and the energy (via eq. \ref{eq:ham}), we perform the simulation with only one sample, but we perform a simulation starting in every pattern.
 
 \subsection{Motivation}
 
@@ -98,13 +99,33 @@ M said that maybe, due to small-scale effects, there is only one minimum. Moreov
 
 \subsection{Input - Output}
 
-\subsubsection{IO - main}
+For the sake of simplicity we firstly run the simulation at zero temperature, so the parameter that varies along vary simulation is the parameter of the distribution $a$.
 
+
+\subsubsection{IO - main}
+\textbf{Input:}
+\begin{itemize}
+\item $N$, number of neurons, positive integer, default value 1000.
+\item $p$, number of patterns, positive integer, default value 9.
+\item $a$, parameter that determines the distribution, real number between 0 and 1.
+\item $T$, temperature, we are interested in values near 0, for now we will fix it at zero, non negative real number.
+\item $sweep_{max}$, ``time'' evolution of the system, for now 100, positive integer.
+\end{itemize}
+\textbf{Output:}
+A three indices array: one for which pattern is the initial state of the system, one for the time express in term of sweeps, one for the magnetization which respect to
 
 \subsubsection{IO - run}
-
+\begin{itemize}
+ \item[Input:] N, p, sweeps, a, T.
+ \item[Output:] A csv file with in every column a magnetization respect to a pattern, starting from a pattern, and in every row the evolution time.
+\end{itemize}
 
 \subsubsection{IO - plot}
+\begin{itemize}
+ \item[Input:] A csv file with in every column a magnetization respect to a pattern, starting from a pattern, and in every row the evolution time.
+ \item[Output:] $p$ plots, for every starting point, i.e. every pattern, the temporal evolution of every magnetization.
+\end{itemize}
+
 
 
 \printbibliography
