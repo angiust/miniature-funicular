@@ -1,4 +1,5 @@
 import numpy as np
+from typing import Literal
 
 """
 This code implements a Hopfield network with a mixture of distributions for the patterns.
@@ -63,12 +64,22 @@ def init_net_on_a_pattern(patterns, which_pattern):
     return np.sign(patterns[:, which_pattern])
 
 
-def init_neurons(patterns, mixture):
-    if mixture:
+def init_neurons(patterns, init_type):
+    if init_type == "pattern":
+        return init_net_on_a_pattern(patterns, 0)
+    elif init_type == "mixture":
+        if patterns.shape[1] < 3:
+            raise ValueError("Need at least 3 patterns to compute this mixture.")
         mixture_vector = compute_mixture(patterns)
         return np.sign(mixture_vector)
+    elif init_type == "random":
+        return np.sign(np.random.rand(patterns.shape[0]) - 0.5)
     else:
-        return init_net_on_a_pattern(patterns, 0)
+        raise ValueError(
+            "init_type should be 'pattern', 'mixture' or 'random', not {}".format(
+                init_type
+            )
+        )
 
 
 def updated_value(temperature, local_field):
@@ -93,11 +104,11 @@ def dynamic(neurons, couplings, patterns, sweeps, temperature):
         )  # shape (p + 1,)
 
 
-def simulation(N, p, sweep_max, a, T, mixture):
+def simulation(N, p, sweep_max, a, T, init_type: Literal["pattern", "mixture", "random"]):
     patterns = extract_pattern(N, p, a)
     couplings = compute_couplings(N, patterns)
     # assert np.max(np.abs(couplings)) < 1.0, "couplings should be less than 1"
-    neurons = init_neurons(patterns, mixture)
+    neurons = init_neurons(patterns, init_type)
 
     return np.fromiter(
         dynamic(neurons, couplings, patterns, sweep_max, T),
@@ -131,14 +142,19 @@ def simulation_all_pattern_init(N, p, sweep_max, a, T):
     return np.array(story) # shape (p, sweep_max, p + 1)
 
 
-def multiple_simulation(N, p, sweep_max, a, T, s, mixture):
+def multiple_simulation(N, p, sweep_max, a, T, s, init_type: Literal["pattern", "mixture", "random"]):
     """run different simulation with resampling of the patterns
     and return the average magnetization, it can start from the first pattern
     or from the mixture and return the average magnetization respectevely
     from the first pattern or from the mixture"""
     sampled_magnetization = np.array(
-        [simulation(N, p, sweep_max, a, T, mixture) for _ in range(s)]
+        [simulation(N, p, sweep_max, a, T, init_type) for _ in range(s)]
     )
     average_magnetization = np.mean(sampled_magnetization, axis=0)
     standard_deviation = np.std(sampled_magnetization, axis=0)
-    return np.column_stack((average_magnetization, standard_deviation))
+    return np.column_stack((average_magnetization, standard_deviation)) # shape (sweep_max, 2 * (p + 1))
+
+def multiple_simulation_all_story(N, p, sweep_max, a, T, s, init_type: Literal["pattern", "mixture", "random"]):
+    return np.array(
+        [simulation(N, p, sweep_max, a, T, init_type)[-1] for _ in range(s)]
+    ) # shape (s, p + 1)     

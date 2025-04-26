@@ -17,7 +17,13 @@ parser.add_argument("-t", type=int, default=3000, help="number of sweeps")
 parser.add_argument("-a", type=float, default=0, help="parameter of the distribution of probability")
 parser.add_argument("-T", type=float, default=0, help="temperature of the system")
 parser.add_argument("-s", type=int, default=20, help="number of samples")
-parser.add_argument('--mix', action='store_true', help="if mix is true it do the mixture simulation")
+#parser.add_argument('--mix', action='store_true', help="if mix is true it do the mixture simulation")
+parser.add_argument(
+    "--init_type",
+    choices=["pattern", "mixture", "random"],
+    default="pattern",
+    help="Initialization type: 'pattern', 'mixture', or 'random'."
+)
 parser.add_argument("--seed", type=int, default=None, help="random seed for reproducibility")
 
 arguments = parser.parse_args()
@@ -32,9 +38,9 @@ multiple_evolution = multiple_simulation(
     a=arguments.a,
     T=arguments.T,
     s=arguments.s,
-    mixture=arguments.mix
+    init_type=arguments.init_type
 )
 
 p=arguments.p
-header = ",".join([f"m_{i+1}" for i in range(p)] + [f"std_{i+1}" for i in range(p)])
+header = ",".join([f"m_{i+1}" for i in range(p)] + ["e"] + [f"std_{i+1}" for i in range(p)] + ["std_e"])
 np.savetxt(sys.stdout, multiple_evolution, delimiter=",", fmt="%.5f", header=header)
