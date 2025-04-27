@@ -2,7 +2,41 @@
 
 ## simulation:
 
+### every pattern:
+
+data:
+
+parallel --bar --jobs 2 './run/one_sample_every_pattern_init.py -T {1} -a {2} > outputs/data/everyPattern/everyPatternInit_T{1}_a{2}_1.csv' ::: 0 0.1 0.01 ::: 0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0
+
+plot:
+
+parallel --bar --jobs 4 'base=$(basename {} .csv); ./plot/every_pattern_plot.py --title "{=s/.csv//=}" --output outputs/plot/everyPattern/"$base".png < {}' ::: outputs/data/everyPattern/*.csv
+
 ### first pattern:
+
+data:
+parallel --bar --jobs 2 './run/one_sample_every_pattern_init.py -T {1} -a {2} > outputs/data/firstPattern/firstPattern_T{1}_a{2}_1.csv' ::: 0 0.1 0.01 ::: 0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0
+
+plot:
+parallel --bar --jobs 4 'base=$(basename {} .csv); ./plot/plot.py --title "{=s/.csv//=}" --output outputs/plot/firstPattern/"$base".png < {}' ::: outputs/data/firstPattern/*.csv
+
+### mixture:
+
+data:
+parallel --bar --jobs 2 './run/simulate.py --init_type mixture -T {1} -a {2} > outputs/data/mixtureInit/mixtureInit_T{1}_a{2}_1.csv' ::: 0 0.1 0.01 ::: 0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0
+
+plot:
+parallel --bar --jobs 4 'base=$(basename {} .csv); ./plot/plot.py --title "{=s/.csv//=}" --output outputs/plot/mixtureInit/"$base".png < {}' ::: outputs/data/mixtureInit/*.csv
+
+### magnetization hystogram:
+
+data:
+parallel --bar --jobs 2 './run/hystograms.py -s 100 -T {1} -a {2} > outputs/data/magnHyst/magnHyst_T{1}_a{2}_1.csv' ::: 0 ::: 0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0
+
+plot:
+parallel --bar --jobs 4 'base=$(basename {} .csv); ./plot/hystogram_plot.py --title "{=s/.csv//=}" --output outputs/plot/magnHyst/"$base".png < {}' ::: outputs/data/magnHyst/*.csv
+
+### first pattern old:
 
 for t in 0.{0..9} 1.0; do ./simulate.py -T "$t" -t 100 > output/output_"$t".csv & done
 

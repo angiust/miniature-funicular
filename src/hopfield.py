@@ -104,7 +104,9 @@ def dynamic(neurons, couplings, patterns, sweeps, temperature):
         )  # shape (p + 1,)
 
 
-def simulation(N, p, sweep_max, a, T, init_type: Literal["pattern", "mixture", "random"]):
+def simulation(
+    N, p, sweep_max, a, T, init_type: Literal["pattern", "mixture", "random"]
+):
     patterns = extract_pattern(N, p, a)
     couplings = compute_couplings(N, patterns)
     # assert np.max(np.abs(couplings)) < 1.0, "couplings should be less than 1"
@@ -113,7 +115,7 @@ def simulation(N, p, sweep_max, a, T, init_type: Literal["pattern", "mixture", "
     return np.fromiter(
         dynamic(neurons, couplings, patterns, sweep_max, T),
         dtype=np.dtype((float, p + 1)),
-    ) # shape (sweep_max, p + 1)
+    )  # shape (sweep_max, p + 1)
 
 
 def simulation_all_pattern_init(N, p, sweep_max, a, T):
@@ -139,10 +141,12 @@ def simulation_all_pattern_init(N, p, sweep_max, a, T):
         for i in range(p)
     ]
 
-    return np.array(story) # shape (p, sweep_max, p + 1)
+    return np.array(story)  # shape (p, sweep_max, p + 1)
 
 
-def multiple_simulation(N, p, sweep_max, a, T, s, init_type: Literal["pattern", "mixture", "random"]):
+def multiple_simulation(
+    N, p, sweep_max, a, T, s, init_type: Literal["pattern", "mixture", "random"]
+):
     """run different simulation with resampling of the patterns
     and return the average magnetization, it can start from the first pattern
     or from the mixture and return the average magnetization respectevely
@@ -152,9 +156,14 @@ def multiple_simulation(N, p, sweep_max, a, T, s, init_type: Literal["pattern", 
     )
     average_magnetization = np.mean(sampled_magnetization, axis=0)
     standard_deviation = np.std(sampled_magnetization, axis=0)
-    return np.column_stack((average_magnetization, standard_deviation)) # shape (sweep_max, 2 * (p + 1))
+    return np.column_stack(
+        (average_magnetization, standard_deviation)
+    )  # shape (sweep_max, 2 * (p + 1))
 
-def multiple_simulation_all_story(N, p, sweep_max, a, T, s, init_type: Literal["pattern", "mixture", "random"]):
+
+def multiple_simulation_all_story(
+    N, p, sweep_max, a, T, s, init_type: Literal["pattern", "mixture", "random"]
+):
     return np.array(
         [simulation(N, p, sweep_max, a, T, init_type)[-1] for _ in range(s)]
-    ) # shape (s, p + 1)     
+    )  # shape (s, p + 1)
