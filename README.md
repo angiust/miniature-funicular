@@ -36,6 +36,18 @@ parallel --bar --jobs 2 './run/hystograms.py -s 100 -T {1} -a {2} > outputs/data
 plot:
 parallel --bar --jobs 4 'base=$(basename {} .csv); ./plot/hystogram_plot.py --title "{=s/.csv//=}" --output outputs/plot/magnHyst/"$base".png < {}' ::: outputs/data/magnHyst/*.csv
 
+### random init:
+
+data:
+parallel --bar --jobs 2 './run/simulate.py --init_type random -T {1} -a {2} > outputs/data/randomInit/randomInit_T{1}_a{2}_1.csv' ::: 0 0.1 0.01 ::: 0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0
+
+plot:
+parallel --bar --jobs 4 'base=$(basename {} .csv); ./plot/plot.py --title "{=s/.csv//=}" --output outputs/plot/randomInit/"$base".png < {}' ::: outputs/data/randomInit/*.csv
+
+### vary sample not averaged random init:
+
+
+
 ### first pattern old:
 
 for t in 0.{0..9} 1.0; do ./simulate.py -T "$t" -t 100 > output/output_"$t".csv & done

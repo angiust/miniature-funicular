@@ -8,7 +8,7 @@ import numpy as np
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'src')))
 
-from hopfield import simulation_all_pattern_init
+from hopfield import simulation_all_pattern_init, multiple_simulation_random
 
 parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 parser.add_argument("-N", type=int, default=1000, help="number of neurons")
@@ -16,17 +16,27 @@ parser.add_argument("-p", type=int, default=9, help="number of patterns")
 parser.add_argument("-t", type=int, default=100, help="number of sweeps")
 parser.add_argument("-a", type=float, default=0, help="parameter of the distribution of probability")
 parser.add_argument("-T", type=float, default=0, help="temperature of the system")
+parser.add_argument('--random', action='store_true', help="if random is true it do the random init simulation")
 
 arguments = parser.parse_args()
 
-
-multiple_evolution = simulation_all_pattern_init(
-    N=arguments.N,
-    p=arguments.p,
-    sweep_max=arguments.t,
-    a=arguments.a,
-    T=arguments.T
-)
+if arguments.random:
+    multiple_evolution = multiple_simulation_random(
+        N=arguments.N,
+        p=arguments.p,
+        sweep_max=arguments.t,
+        a=arguments.a,
+        T=arguments.T,
+        s=20
+    )
+else:
+    multiple_evolution = simulation_all_pattern_init(
+        N=arguments.N,
+        p=arguments.p,
+        sweep_max=arguments.t,
+        a=arguments.a,
+        T=arguments.T
+    )
 
 # multiple_evolution shape = (p, t, p + 1)
 

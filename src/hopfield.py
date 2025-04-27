@@ -1,5 +1,5 @@
 import numpy as np
-from typing import Literal
+from typing import Literal, Optional
 
 """
 This code implements a Hopfield network with a mixture of distributions for the patterns.
@@ -18,7 +18,7 @@ def sign(x):  # i keep it because maybe i'll use it
         return 2 * (np.random.rand() < 0.5) - 1  # np.random.choice([-1, 1])
 
 
-def extract_pattern(neurons_number, patterns_number, distribution_param):
+def extract_pattern_old(neurons_number, patterns_number, distribution_param):
     """Sample patterns_number random patterns such that
     every component is a number sampled from the distribution:
     p(ξ) = a/(2√2) * exp(-|ξ|/√2) + (1-a)/2 * [δ(ξ-1) + δ(ξ+1)]"""
@@ -30,6 +30,26 @@ def extract_pattern(neurons_number, patterns_number, distribution_param):
     )  # maybe 2 * (np.random.rand() < 0.5) - 1 it's better
     return np.where(mask, laplace, delta)
 
+def extract_pattern(neurons_number, patterns_number, distribution_param, delta: Optional[bool] = False):
+    """Sample patterns_number random patterns.
+    If delta=False (default):
+        Each component is drawn from:
+        p(ξ) = a/(2√2) * exp(-|ξ|/√2) + (1-a)/2 * [δ(ξ-1) + δ(ξ+1)]
+    If delta=True:
+        Each component is:
+            0 with probability 'a',
+           -1 or 1 with probability (1-a)/2 each.
+    """
+    size = (neurons_number, patterns_number)
+    mask = np.random.rand(*size) < distribution_param
+
+    if delta:
+        delta_values = np.random.choice([-1.0, 1.0], size=size)
+        return np.where(mask, 0.0, delta_values)
+    else:
+        laplace = np.random.laplace(loc=0, scale=np.sqrt(2), size=size)
+        delta_values = np.random.choice([-1.0, 1.0], size=size)
+        return np.where(mask, laplace, delta_values)
 
 def compute_couplings(neurons_number, patterns):
     couplings = (patterns @ patterns.T) / neurons_number
@@ -167,3 +187,10 @@ def multiple_simulation_all_story(
     return np.array(
         [simulation(N, p, sweep_max, a, T, init_type)[-1] for _ in range(s)]
     )  # shape (s, p + 1)
+
+def multiple_simulation_random(
+    N, p, sweep_max, a, T, s
+):
+    return np.array(
+        [simulation(N, p, sweep_max, a, T, init_type="random") for _ in range(s)]
+    ) # shape (s, sweep_max, p + 1)
