@@ -182,10 +182,10 @@ def multiple_simulation(
 
 
 def multiple_simulation_all_story(
-    N, p, sweep_max, a, T, s, init_type: Literal["pattern", "mixture", "random"]
+    N, p, sweep_max, a, T, s, init_type: Literal["pattern", "mixture", "random"], delta: Optional[bool] = False
 ):
     return np.array(
-        [simulation(N, p, sweep_max, a, T, init_type)[-1] for _ in range(s)]
+        [simulation(N, p, sweep_max, a, T, init_type, delta)[-1] for _ in range(s)]
     )  # shape (s, p + 1)
 
 def multiple_simulation_random(

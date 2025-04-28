@@ -25,6 +25,7 @@ parser.add_argument(
     default="pattern",
     help="Initialization type: 'pattern', 'mixture', or 'random'."
 )
+parser.add_argument('--d', action='store_true', help="if delta is true it do the delta simulation")
 
 arguments = parser.parse_args()
 
@@ -37,7 +38,8 @@ final_overlaps_all_runs = multiple_simulation_all_story(
     a=arguments.a,
     T=arguments.T, # Should be 0
     s=arguments.s,
-    init_type=arguments.init_type
+    init_type=arguments.init_type,
+    delta=arguments.d
 )
 
 # --- Save Data ---
