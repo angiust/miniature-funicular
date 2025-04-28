@@ -30,6 +30,7 @@ def extract_pattern_old(neurons_number, patterns_number, distribution_param):
     )  # maybe 2 * (np.random.rand() < 0.5) - 1 it's better
     return np.where(mask, laplace, delta)
 
+
 def extract_pattern(neurons_number, patterns_number, distribution_param, delta: Optional[bool] = False):
     """Sample patterns_number random patterns.
     If delta=False (default):
@@ -61,7 +62,7 @@ def compute_mixture(patterns):
     if patterns.shape[1] < 3:
         raise ValueError("Need at least 3 patterns to compute this mixture.")
     mixture = patterns[:, 0] + patterns[:, 1] + patterns[:, 2]
-    assert np.all(mixture != 0), "sign of mixture should be non-zero"
+    # assert np.all(mixture != 0), "sign of mixture should be non-zero"
     return mixture
 
 
@@ -78,10 +79,9 @@ def energy(neurons, couplings):
 def init_net_on_a_pattern(patterns, which_pattern):
     if which_pattern < 0 & patterns.shape[1] < which_pattern + 2:
         raise ValueError("Choosen a pattern that doesn't exist")
-    assert np.all(patterns[:, which_pattern] != 0), (
-        "sign of patterns should be non-zero"
-    )
-    return np.sign(patterns[:, which_pattern])
+    # assert np.all(patterns[:, which_pattern] != 0), ("sign of patterns should be non-zero")
+    neurons = np.array([sign(s) for s in patterns[:, which_pattern]], dtype=float)
+    return neurons # np.sign(patterns[:, which_pattern])
 
 
 def init_neurons(patterns, init_type):
@@ -91,7 +91,7 @@ def init_neurons(patterns, init_type):
         if patterns.shape[1] < 3:
             raise ValueError("Need at least 3 patterns to compute this mixture.")
         mixture_vector = compute_mixture(patterns)
-        return np.sign(mixture_vector)
+        return np.array([sign(s) for s in mixture_vector], dtype=float) # np.sign(mixture_vector)
     elif init_type == "random":
         return np.sign(np.random.rand(patterns.shape[0]) - 0.5)
     else:
@@ -104,8 +104,8 @@ def init_neurons(patterns, init_type):
 
 def updated_value(temperature, local_field):
     if temperature == 0:
-        assert local_field != 0, "sign of 0 local field is concerning!"
-        return np.sign(local_field)
+        #assert local_field != 0, "sign of 0 local field is concerning!"
+        return sign(local_field) #np.sign(local_field)
     return 2 * (np.random.rand() < (1 + np.tanh(local_field / temperature)) / 2) - 1
 
 
@@ -125,9 +125,9 @@ def dynamic(neurons, couplings, patterns, sweeps, temperature):
 
 
 def simulation(
-    N, p, sweep_max, a, T, init_type: Literal["pattern", "mixture", "random"]
+    N, p, sweep_max, a, T, init_type: Literal["pattern", "mixture", "random"], delta: Optional[bool] = False
 ):
-    patterns = extract_pattern(N, p, a)
+    patterns = extract_pattern(N, p, a, delta)
     couplings = compute_couplings(N, patterns)
     # assert np.max(np.abs(couplings)) < 1.0, "couplings should be less than 1"
     neurons = init_neurons(patterns, init_type)
@@ -138,11 +138,11 @@ def simulation(
     )  # shape (sweep_max, p + 1)
 
 
-def simulation_all_pattern_init(N, p, sweep_max, a, T):
+def simulation_all_pattern_init(N, p, sweep_max, a, T, delta: Optional[bool] = False):
     """run a simulation with with one sample of the patterns
     and return the magnetization at each sweep and respect
     each pattern"""
-    patterns = extract_pattern(N, p, a)
+    patterns = extract_pattern(N, p, a, delta)
     couplings = compute_couplings(N, patterns)
     # story = []
     # for i in range(p):
@@ -165,14 +165,14 @@ def simulation_all_pattern_init(N, p, sweep_max, a, T):
 
 
 def multiple_simulation(
-    N, p, sweep_max, a, T, s, init_type: Literal["pattern", "mixture", "random"]
+    N, p, sweep_max, a, T, s, init_type: Literal["pattern", "mixture", "random"], delta: Optional[bool] = False
 ):
     """run different simulation with resampling of the patterns
     and return the average magnetization, it can start from the first pattern
     or from the mixture and return the average magnetization respectevely
     from the first pattern or from the mixture"""
     sampled_magnetization = np.array(
-        [simulation(N, p, sweep_max, a, T, init_type) for _ in range(s)]
+        [simulation(N, p, sweep_max, a, T, init_type, delta) for _ in range(s)]
     )
     average_magnetization = np.mean(sampled_magnetization, axis=0)
     standard_deviation = np.std(sampled_magnetization, axis=0)
@@ -189,8 +189,8 @@ def multiple_simulation_all_story(
     )  # shape (s, p + 1)
 
 def multiple_simulation_random(
-    N, p, sweep_max, a, T, s
+    N, p, sweep_max, a, T, s, delta: Optional[bool] = False
 ):
     return np.array(
-        [simulation(N, p, sweep_max, a, T, init_type="random") for _ in range(s)]
+        [simulation(N, p, sweep_max, a, T, init_type="random", delta=delta) for _ in range(s)]
     ) # shape (s, sweep_max, p + 1)

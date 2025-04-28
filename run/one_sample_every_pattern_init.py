@@ -17,6 +17,7 @@ parser.add_argument("-t", type=int, default=100, help="number of sweeps")
 parser.add_argument("-a", type=float, default=0, help="parameter of the distribution of probability")
 parser.add_argument("-T", type=float, default=0, help="temperature of the system")
 parser.add_argument('--random', action='store_true', help="if random is true it do the random init simulation")
+parser.add_argument('--d', action='store_true', help="if delta is true it do the delta simulation")
 
 arguments = parser.parse_args()
 
@@ -27,7 +28,8 @@ if arguments.random:
         sweep_max=arguments.t,
         a=arguments.a,
         T=arguments.T,
-        s=20
+        s=20,
+        delta=arguments.d
     )
 else:
     multiple_evolution = simulation_all_pattern_init(
@@ -35,7 +37,8 @@ else:
         p=arguments.p,
         sweep_max=arguments.t,
         a=arguments.a,
-        T=arguments.T
+        T=arguments.T,
+        delta=arguments.d
     )
 
 # multiple_evolution shape = (p, t, p + 1)

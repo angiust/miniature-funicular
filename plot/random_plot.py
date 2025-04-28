@@ -9,7 +9,7 @@ import math
 # --- Argument parsing ---
 parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 parser.add_argument("-i", "--input", type=str, default="-", help="Input CSV file (use '-' for stdin)")
-parser.add_argument("--samples", type=int, default=10, help="Number of samples to plot")
+parser.add_argument("--samples", type=int, default=20, help="Number of samples to plot")
 parser.add_argument("--title", type=str, default="Samples Magnetization and Energy", help="Base title for the plots")
 parser.add_argument("--output", type=str, help="Base output filename (without extension)")
 
@@ -49,7 +49,8 @@ for sample_idx in range(num_samples):
 
     sweeps_axis = np.arange(1, data.shape[0] + 1)
 
-    fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(10, 8), sharex=True)
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 8), sharex=True)
+    # fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(10, 8), sharex=True)
 
     # Plot magnetizations
     for pattern_idx in range(p):

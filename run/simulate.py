@@ -25,6 +25,7 @@ parser.add_argument(
     help="Initialization type: 'pattern', 'mixture', or 'random'."
 )
 parser.add_argument("--seed", type=int, default=None, help="random seed for reproducibility")
+parser.add_argument('--d', action='store_true', help="if delta is true it do the delta simulation")
 
 arguments = parser.parse_args()
 
@@ -38,7 +39,8 @@ multiple_evolution = multiple_simulation(
     a=arguments.a,
     T=arguments.T,
     s=arguments.s,
-    init_type=arguments.init_type
+    init_type=arguments.init_type,
+    delta=arguments.d
 )
 
 p=arguments.p
