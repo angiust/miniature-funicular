@@ -5,17 +5,15 @@
 ### every pattern:
 
 data:
-
 parallel --bar --jobs 2 './run/one_sample_every_pattern_init.py -T {1} -a {2} > outputs/data/everyPattern/everyPatternInit_T{1}_a{2}_1.csv' ::: 0 0.1 0.01 ::: 0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0
 
 plot:
-
 parallel --bar --jobs 4 'base=$(basename {} .csv); ./plot/every_pattern_plot.py --title "{=s/.csv//=}" --output outputs/plot/everyPattern/"$base".png < {}' ::: outputs/data/everyPattern/*.csv
 
 ### first pattern:
 
 data:
-parallel --bar --jobs 2 './run/one_sample_every_pattern_init.py -T {1} -a {2} > outputs/data/firstPattern/firstPattern_T{1}_a{2}_1.csv' ::: 0 0.1 0.01 ::: 0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0
+parallel --bar --jobs 2 './run/simulate.py -T {1} -a {2} > outputs/data/firstPattern/firstPattern_T{1}_a{2}_1.csv' ::: 0 0.1 0.01 ::: 0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0
 
 plot:
 parallel --bar --jobs 4 'base=$(basename {} .csv); ./plot/plot.py --title "{=s/.csv//=}" --output outputs/plot/firstPattern/"$base".png < {}' ::: outputs/data/firstPattern/*.csv
@@ -46,7 +44,11 @@ parallel --bar --jobs 4 'base=$(basename {} .csv); ./plot/plot.py --title "{=s/.
 
 ### vary sample not averaged random init:
 
+data:
+parallel --bar --jobs 2 './run/one_sample_every_pattern_init.py --random -T {1} -a {2} > outputs/data/varyRandomInit/varyRandomInit_T{1}_a{2}_1.csv' ::: 0 0.1 0.01 ::: 0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0
 
+plot:
+parallel --bar --jobs 4 'base=$(basename {} .csv); ./plot/random_plot.py --title "{=s/.csv//=}" --output outputs/plot/randomInit/"$base".png < {}' ::: outputs/data/randomInit/*.csv
 
 ### first pattern old:
 
