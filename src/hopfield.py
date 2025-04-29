@@ -76,7 +76,7 @@ def compute_all_three_mixtures(patterns):
         for j in range(i + 1, patterns.shape[1]):
             for k in range(j + 1, patterns.shape[1]):
                 mixtures.append(patterns[:, i] + patterns[:, j] + patterns[:, k])
-    return np.array(mixtures).T  # shape (N, (p choose 3))
+    return np.array(np.sign(mixtures)).T  # shape (N, (p choose 3))
 
 
 def magnetization(neurons, patterns):
@@ -225,7 +225,7 @@ def compute_energy(N, p, distrib_param, delta: Optional[bool] = False):
     """compute the energy of the patterns and the mixture of the patterns"""
     patterns = extract_pattern(N, p, distrib_param, delta)
     couplings = compute_couplings(N, patterns)
-    patterns_energy = pattern_energy(patterns, couplings)
+    patterns_energy = pattern_energy(np.sign(patterns), couplings)
     mixtures_energy = mixture_energy(patterns, couplings)
     return np.concatenate( (patterns_energy, mixtures_energy) )  # shape (p + n)
 
@@ -238,3 +238,24 @@ def varying_a_energy(N, p, delta: Optional[bool] = False):
     for a in a_values:
         energies.append(compute_energy(N, p, a, delta))
     return np.array(energies)  # shape (10, p + n)
+
+
+def varying_a_energy_stat(N, p, delta: Optional[bool] = False):
+    """compute the energy of the patterns and the mixture of the patterns
+    for different values of a"""
+    a_values = np.linspace(0, 1, 25)
+    energies = []
+    for a in a_values:
+        energies.append(compute_energy(N, p, a, delta))
+    energies = np.array(energies)  # shape: (10, p + n_mixtures)
+    energies_patterns = energies[:, :p]       # shape: (10, p)
+    energies_mixtures = energies[:, p:]       # shape: (10, n_mixtures)
+
+    stats = {
+        "patterns_mean": np.mean(energies_patterns, axis=1),  # shape: (10,)
+        "patterns_std": np.std(energies_patterns, axis=1),    # shape: (10,)
+        "mixtures_mean": np.mean(energies_mixtures, axis=1),  # shape: (10,)
+        "mixtures_std": np.std(energies_mixtures, axis=1),    # shape: (10,)
+    }
+
+    return stats
