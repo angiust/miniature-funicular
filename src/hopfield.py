@@ -46,11 +46,12 @@ def extract_pattern(neurons_number, patterns_number, distribution_param, delta: 
 
     if delta:
         delta_values = np.random.choice([-1.0, 1.0], size=size)
-        return np.where(mask, 0.0, delta_values)
+        return np.where(mask, 0.0, delta_values) # shape (N, p)
     else:
         laplace = np.random.laplace(loc=0, scale=np.sqrt(2), size=size)
         delta_values = np.random.choice([-1.0, 1.0], size=size)
-        return np.where(mask, laplace, delta_values)
+        return np.where(mask, laplace, delta_values) # shape (N, p)
+
 
 def compute_couplings(neurons_number, patterns):
     couplings = (patterns @ patterns.T) / neurons_number
@@ -64,6 +65,18 @@ def compute_mixture(patterns):
     mixture = patterns[:, 0] + patterns[:, 1] + patterns[:, 2]
     # assert np.all(mixture != 0), "sign of mixture should be non-zero"
     return mixture
+
+
+def compute_all_three_mixtures(patterns):
+    """compute all the three mixtures of the patterns"""
+    if patterns.shape[1] < 3:
+        raise ValueError("Need at least 3 patterns to compute this mixture.")
+    mixtures = []
+    for i in range(patterns.shape[1]):
+        for j in range(i + 1, patterns.shape[1]):
+            for k in range(j + 1, patterns.shape[1]):
+                mixtures.append(patterns[:, i] + patterns[:, j] + patterns[:, k])
+    return np.array(mixtures).T  # shape (N, (p choose 3))
 
 
 def magnetization(neurons, patterns):
@@ -169,8 +182,8 @@ def multiple_simulation(
 ):
     """run different simulation with resampling of the patterns
     and return the average magnetization, it can start from the first pattern
-    or from the mixture and return the average magnetization respectevely
-    from the first pattern or from the mixture"""
+    or from the mixture or from a random pattern and return the average magnetization
+    respectevely from the first pattern or from the mixture"""
     sampled_magnetization = np.array(
         [simulation(N, p, sweep_max, a, T, init_type, delta) for _ in range(s)]
     )
@@ -183,7 +196,10 @@ def multiple_simulation(
 
 def multiple_simulation_all_story(
     N, p, sweep_max, a, T, s, init_type: Literal["pattern", "mixture", "random"], delta: Optional[bool] = False
-):
+): # it returns the last magnetization of each simulation with resampling of the patterns
+    """run different simulation with resampling of the patterns
+    and return the last magnetization, it can start from the first pattern
+    or from the mixture or from a random pattern"""
     return np.array(
         [simulation(N, p, sweep_max, a, T, init_type, delta)[-1] for _ in range(s)]
     )  # shape (s, p + 1)
@@ -194,3 +210,31 @@ def multiple_simulation_random(
     return np.array(
         [simulation(N, p, sweep_max, a, T, init_type="random", delta=delta) for _ in range(s)]
     ) # shape (s, sweep_max, p + 1)
+
+def pattern_energy(patterns, couplings):
+    return np.array([energy(pattern, couplings) for pattern in patterns.T])  # shape (p,)
+
+def mixture_energy(patterns, couplings):
+    if patterns.shape[1] < 3:
+        raise ValueError("Need at least 3 patterns to compute this mixture.")
+    mixture = compute_all_three_mixtures(patterns)
+    return np.array([energy(mixture_vector, couplings) for mixture_vector in mixture.T])  # shape (n,)
+
+
+def compute_energy(N, p, distrib_param, delta: Optional[bool] = False):
+    """compute the energy of the patterns and the mixture of the patterns"""
+    patterns = extract_pattern(N, p, distrib_param, delta)
+    couplings = compute_couplings(N, patterns)
+    patterns_energy = pattern_energy(patterns, couplings)
+    mixtures_energy = mixture_energy(patterns, couplings)
+    return np.concatenate( (patterns_energy, mixtures_energy) )  # shape (p + n)
+
+
+def varying_a_energy(N, p, delta: Optional[bool] = False):
+    """compute the energy of the patterns and the mixture of the patterns
+    for different values of a"""
+    a_values = np.linspace(0, 1, 10)
+    energies = []
+    for a in a_values:
+        energies.append(compute_energy(N, p, a, delta))
+    return np.array(energies)  # shape (10, p + n)
