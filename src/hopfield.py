@@ -204,15 +204,23 @@ def multiple_simulation_all_story(
         [simulation(N, p, sweep_max, a, T, init_type, delta)[-1] for _ in range(s)]
     )  # shape (s, p + 1)
 
+
 def multiple_simulation_random(
-    N, p, sweep_max, a, T, s, delta: Optional[bool] = False
+    N, p, sweep_max, a, T, s, mixture: Optional[bool] = False, delta: Optional[bool] = False
 ):
-    return np.array(
-        [simulation(N, p, sweep_max, a, T, init_type="random", delta=delta) for _ in range(s)]
-    ) # shape (s, sweep_max, p + 1)
+    if mixture:
+        return np.array(
+            [simulation(N, p, sweep_max, a, T, init_type="mixture", delta=delta) for _ in range(s)]
+        ) # shape (s, sweep_max, p + 1)
+    else:
+        return np.array(
+            [simulation(N, p, sweep_max, a, T, init_type="random", delta=delta) for _ in range(s)]
+        ) # shape (s, sweep_max, p + 1)
+
 
 def pattern_energy(patterns, couplings):
     return np.array([energy(pattern, couplings) for pattern in patterns.T])  # shape (p,)
+
 
 def mixture_energy(patterns, couplings):
     if patterns.shape[1] < 3:

@@ -29,6 +29,7 @@ if arguments.random:
         a=arguments.a,
         T=arguments.T,
         s=20,
+        mixture=True,
         delta=arguments.d
     )
 else:
