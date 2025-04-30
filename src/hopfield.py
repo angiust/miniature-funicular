@@ -144,11 +144,15 @@ def simulation(
     couplings = compute_couplings(N, patterns)
     # assert np.max(np.abs(couplings)) < 1.0, "couplings should be less than 1"
     neurons = init_neurons(patterns, init_type)
+    if init_type == "mixture":
+        mixture = np.sign(compute_mixture(patterns))
+        patterns = np.column_stack((patterns, mixture))  # now shape (N, p+1)
+        p = p + 1
 
     return np.fromiter(
         dynamic(neurons, couplings, patterns, sweep_max, T),
         dtype=np.dtype((float, p + 1)),
-    )  # shape (sweep_max, p + 1)
+    )  # shape (sweep_max, p + 2) if mixture, else (sweep_max, p + 1)
 
 
 def simulation_all_pattern_init(N, p, sweep_max, a, T, delta: Optional[bool] = False):
@@ -157,10 +161,6 @@ def simulation_all_pattern_init(N, p, sweep_max, a, T, delta: Optional[bool] = F
     each pattern"""
     patterns = extract_pattern(N, p, a, delta)
     couplings = compute_couplings(N, patterns)
-    # story = []
-    # for i in range(p):
-    #    neurons = init_net_on_a_pattern(patterns, i)
-    #    story.append(np.fromiter(dynamic(neurons, couplings, patterns, sweep_max, T), dtype = np.dtype((float, p))))
     story = [
         list(
             dynamic(
