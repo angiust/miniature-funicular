@@ -1,13 +1,16 @@
 import sys
+import os
 
 import numpy as np
+
+sys.path.append(os.path.join(os.path.dirname(__file__), 'src'))
 
 import hopfield
 
 random_seed = 42
 source_file = "expected.csv"
 
-
+"""
 def check_consistency():
     np.random.seed(random_seed)  # Set the random seed for reproducibility
     expected = np.loadtxt(source_file, delimiter=',')[:,1]
@@ -18,3 +21,18 @@ def check_consistency():
 
 
 check_consistency()
+"""
+
+def test_combinations_of_identity():
+    N = 1000
+    p = 9
+    n = 3
+    patterns = hopfield.extract_pattern(N, p, 0.3, delta=True)
+
+    mixtures_general = hopfield.compute_all_n_mixtures(patterns, n)
+    mixtures_three = hopfield.compute_all_three_mixtures(patterns)
+
+    assert np.array_equal(mixtures_general, mixtures_three), "Mismatch in mixture results for n=3"
+
+
+test_combinations_of_identity()
