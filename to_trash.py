@@ -58,3 +58,13 @@ if arguments.output:
     plt.savefig(arguments.output)
 else:
     plt.show()
+
+
+import numpy as np
+from itertools import combinations
+
+def combinations_of_identity(N, n):
+    I = np.eye(N, dtype=int)
+    vecs = [np.sum(cols, axis=0) for cols in combinations(I, n)]
+    return np.array(vecs)  # shape: (N, C(N, n))
+
