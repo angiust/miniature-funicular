@@ -1,5 +1,6 @@
 import numpy as np
 from typing import Literal, Optional
+from itertools import combinations
 
 """
 This code implements a Hopfield network with a mixture of distributions for the patterns.
@@ -65,6 +66,19 @@ def compute_mixture(patterns):
     mixture = patterns[:, 0] + patterns[:, 1] + patterns[:, 2]
     # assert np.all(mixture != 0), "sign of mixture should be non-zero"
     return mixture
+
+
+def comb_matrix(N, n):
+    I = np.eye(N, dtype=int)
+    vecs = [np.sum(cols, axis=0) for cols in combinations(I, n)]
+    return np.stack(vecs, axis=1)  # shape: (N, C(N, n))
+
+
+def compute_all_n_mixtures(patterns, n):
+    assert patterns.shape[1] >= n, "Need at least n patterns to compute this mixture."
+    comb = comb_matrix(patterns.shape[1], n)
+    mixtures_continuous = patterns @ comb
+    return np.sign(mixtures_continuous)  # shape (N, C(p, n))
 
 
 def compute_all_three_mixtures(patterns):
