@@ -1,6 +1,7 @@
 import numpy as np
 from typing import Literal, Optional
 from itertools import combinations
+import math
 
 """
 This code implements a Hopfield network with a mixture of distributions for the patterns.
@@ -237,10 +238,15 @@ def pattern_energy(patterns, couplings):
 
 
 def mixture_energy(patterns, couplings):
-    if patterns.shape[1] < 3:
-        raise ValueError("Need at least 3 patterns to compute this mixture.")
+    assert patterns.shape[1] >= 3, "Need at least 3 patterns to compute this mixture."
     mixture = compute_all_three_mixtures(patterns)
     return np.array([energy(mixture_vector, couplings) for mixture_vector in mixture.T])  # shape (n,)
+
+
+def n_mixture_energy(patterns, couplings, n):
+    assert patterns.shape[1] >= n, "Need at least n patterns to compute this mixture."
+    mixtures = compute_all_n_mixtures(patterns, n)
+    return np.array([energy(mixture_vector, couplings) for mixture_vector in mixtures.T])  # shape (C(p, n),)
 
 
 def compute_energy(N, p, distrib_param, delta: Optional[bool] = False):
@@ -250,6 +256,16 @@ def compute_energy(N, p, distrib_param, delta: Optional[bool] = False):
     patterns_energy = pattern_energy(np.sign(patterns), couplings)
     mixtures_energy = mixture_energy(patterns, couplings)
     return np.concatenate( (patterns_energy, mixtures_energy) )  # shape (p + n)
+
+
+def compute_energy_until_5(N, p, distrib_param, delta: Optional[bool] = False):
+    assert p >= 5, "Need at least 5 patterns to compute this mixture."
+    patterns = extract_pattern(N, p, distrib_param, delta)
+    couplings = compute_couplings(N, patterns)
+    patterns_energy = pattern_energy(np.sign(patterns), couplings)
+    three_mixtures_energy = n_mixture_energy(patterns, couplings, 3)
+    five_mixtures_energy = n_mixture_energy(patterns, couplings, 5)
+    return np.concatenate( (patterns_energy, three_mixtures_energy, five_mixtures_energy) )  # shape (p + n + m)
 
 
 def varying_a_energy(N, p, delta: Optional[bool] = False):
@@ -269,15 +285,89 @@ def varying_a_energy_stat(N, p, delta: Optional[bool] = False):
     energies = []
     for a in a_values:
         energies.append(compute_energy(N, p, a, delta))
-    energies = np.array(energies)  # shape: (10, p + n_mixtures)
-    energies_patterns = energies[:, :p]       # shape: (10, p)
-    energies_mixtures = energies[:, p:]       # shape: (10, n_mixtures)
+    energies = np.array(energies)  # shape: (25, p + n_mixtures)
+    energies_patterns = energies[:, :p]       # shape: (25, p)
+    energies_mixtures = energies[:, p:]       # shape: (25, n_mixtures)
 
     stats = {
-        "patterns_mean": np.mean(energies_patterns, axis=1),  # shape: (10,)
-        "patterns_std": np.std(energies_patterns, axis=1),    # shape: (10,)
-        "mixtures_mean": np.mean(energies_mixtures, axis=1),  # shape: (10,)
-        "mixtures_std": np.std(energies_mixtures, axis=1),    # shape: (10,)
+        "patterns_mean": np.mean(energies_patterns, axis=1),  # shape: (25,)
+        "patterns_std": np.std(energies_patterns, axis=1),    # shape: (25,)
+        "mixtures_mean": np.mean(energies_mixtures, axis=1),  # shape: (25,)
+        "mixtures_std": np.std(energies_mixtures, axis=1),    # shape: (25,)
     }
+
+    return stats
+
+
+def energy_stat_vary_mixs(N, p, delta: Optional[bool] = False):
+    """Compute energy stats for patterns and their 3- and 5-mixtures over varying a."""
+    assert p >= 5, "Need at least 5 patterns to compute 3- and 5-mixture energies."
+    
+    a_values = np.linspace(0, 1, 25)
+    energies = []
+
+    for a in a_values:
+        energies.append(compute_energy_until_5(N, p, a, delta))
+
+    energies = np.array(energies)  # shape: (25, p + C(p,3) + C(p,5))
+
+    n_3_mix = math.comb(p, 3)
+    n_5_mix = math.comb(p, 5)
+
+    assert energies.shape[1] == p + n_3_mix + n_5_mix, (
+        f"Expected shape (25, {p} + {n_3_mix} + {n_5_mix}), "
+        f"but got {energies.shape}"
+    )
+
+    energies_patterns = energies[:, :p]                             # shape: (25, p)
+    energies_3_mix = energies[:, p:p + n_3_mix]                     # shape: (25, C(p,3))
+    energies_5_mix = energies[:, p + n_3_mix:]                      # shape: (25, C(p,5))
+
+    stats = {
+        "patterns_mean": np.mean(energies_patterns, axis=1),
+        "patterns_std": np.std(energies_patterns, axis=1),
+        "3mix_mean": np.mean(energies_3_mix, axis=1),
+        "3mix_std": np.std(energies_3_mix, axis=1),
+        "5mix_mean": np.mean(energies_5_mix, axis=1),
+        "5mix_std": np.std(energies_5_mix, axis=1),
+    }
+
+    return stats
+
+
+def varying_a_energy_stat_until_n(N, p, max_n, delta: Optional[bool] = False):
+    """Compute energy stats for patterns and all odd-n mixtures up to max_n."""
+    assert max_n <= p, "max_n must be ≤ number of patterns"
+    assert max_n % 2 == 1, "max_n must be odd"
+
+    a_values = np.linspace(0, 1, 25)
+    stats = {
+        "a_values": a_values,
+        "patterns_mean": [],
+        "patterns_std": [],
+    }
+    for k in range(3, max_n + 1, 2):
+        stats[f"{k}mix_mean"] = []
+        stats[f"{k}mix_std"] = []
+
+    for a in a_values:
+        patterns = extract_pattern(N, p, a, delta)
+        couplings = compute_couplings(N, patterns)
+
+        # Patterns
+        patterns_E = pattern_energy(np.sign(patterns), couplings)
+        stats["patterns_mean"].append(np.mean(patterns_E))
+        stats["patterns_std"].append(np.std(patterns_E))
+
+        # Mixtures
+        for k in range(3, max_n + 1, 2):
+            mixtures_E = n_mixture_energy(patterns, couplings, k)
+            stats[f"{k}mix_mean"].append(np.mean(mixtures_E))
+            stats[f"{k}mix_std"].append(np.std(mixtures_E))
+
+    # Convert lists to arrays
+    for key in stats:
+        if isinstance(stats[key], list):
+            stats[key] = np.array(stats[key])
 
     return stats
