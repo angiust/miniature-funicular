@@ -58,7 +58,7 @@ data:
 parallel --bar --jobs 2 './run/one_sample_every_pattern_init.py --random -T {1} -a {2} > outputs/data/varyMixInit/varyMixInit_T{1}_a{2}_1.csv' ::: 0 0.01 ::: 0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0
 
 new version (added mixture magnetization as M10):
-parallel --bar --jobs 2 './run/one_sample_every_pattern_init.py --random -T {1} -a {2} --d > outputs/data/d_varyMix_2000/d_varyMix_N2000_T{1}_a{2}_1.csv' ::: 0 0.01 ::: 0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0
+parallel --bar --jobs 2 './run/one_sample_every_pattern_init.py --random -T {1} -a {2} --d -N 2000 > outputs/data/d_varyMix_N2000/d_varyMix_N2000_T{1}_a{2}_1.csv' ::: 0 0.01 ::: 0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0
 
 plot:
 parallel --bar --jobs 4 'base=$(basename {} .csv); ./plot/random_plot.py --title "{=s/.csv//=}" --output outputs/plot/varyMixInit/"$base".png < {}' ::: outputs/data/varyMixInit/*.csv
