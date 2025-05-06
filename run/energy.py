@@ -9,7 +9,7 @@ import numpy as np
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'src')))
 
-from hopfield import varying_a_energy, varying_a_energy_stat, energy_stat_vary_mixs, varying_a_energy_stat_until_n
+from hopfield import varying_a_energy, varying_a_energy_stat, energy_stat_vary_mixs, varying_a_energy_stat_until_n_twenty
 
 parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 parser.add_argument("-N", type=int, default=1000, help="number of neurons")
@@ -20,7 +20,7 @@ parser.add_argument('--d', action='store_true', help="if delta is true it do the
 
 arguments = parser.parse_args()
 
-
+"""
 stats_5 = energy_stat_vary_mixs(
     N=arguments.N,
     p=arguments.p,
@@ -32,15 +32,15 @@ stats = varying_a_energy_stat(
     p=arguments.p,
     delta=arguments.d
 )
-
-stats_7 = varying_a_energy_stat_until_n(
+"""
+stats_7 = varying_a_energy_stat_until_n_twenty(
     N=arguments.N,
     p=arguments.p,
-    max_n=7,
+    max_n=19,
     delta=arguments.d
 )
 
-print(stats_7)
+# print(stats_7)
 
 a_values = np.linspace(0, 1, 25)
 
@@ -106,9 +106,9 @@ def plot_energy_stats_until_n(stats):
     plt.show()
 
 
-plot_energy_stats(stats, a_values)
+#plot_energy_stats(stats, a_values)
 
-plot_energy_stats_5(stats_5, a_values)
+#plot_energy_stats_5(stats_5, a_values)
 
 
 plot_energy_stats_until_n(stats_7)

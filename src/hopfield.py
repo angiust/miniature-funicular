@@ -2,6 +2,7 @@ import numpy as np
 from typing import Literal, Optional
 from itertools import combinations
 import math
+from random import sample
 
 """
 This code implements a Hopfield network with a mixture of distributions for the patterns.
@@ -371,3 +372,66 @@ def varying_a_energy_stat_until_n(N, p, max_n, delta: Optional[bool] = False):
             stats[key] = np.array(stats[key])
 
     return stats
+
+
+def random_combinations_matrix(p: int, n: int, k: int = 20) -> np.ndarray:
+    """Return a (p, k) matrix with k random n-combinations of identity columns summed."""
+    all_indices = list(combinations(range(p), n))
+    sampled_indices = sample(all_indices, min(k, len(all_indices)))  # avoid sampling more than exists
+
+    I = np.eye(p, dtype=int)
+    vecs = [np.sum(I[:, list(idxs)], axis=1) for idxs in sampled_indices]
+    return np.stack(vecs, axis=1)  # shape: (p, k)
+
+
+def varying_a_energy_stat_until_n_twenty(N, p, max_n, delta: Optional[bool] = False):
+    """Compute energy stats for patterns and 20 random odd-n mixtures up to max_n."""
+    assert max_n <= p, "max_n must be ≤ number of patterns"
+    assert max_n % 2 == 1, "max_n must be odd"
+
+    a_values = np.linspace(0, 1, 25)
+    stats = {
+        "a_values": a_values,
+        "patterns_mean": [],
+        "patterns_std": [],
+    }
+    for k in range(3, max_n + 1, 2):
+        stats[f"{k}mix_mean"] = []
+        stats[f"{k}mix_std"] = []
+
+    for a in a_values:
+        patterns = extract_pattern(N, p, a, delta)
+        couplings = compute_couplings(N, patterns)
+
+        # Patterns
+        patterns_E = pattern_energy(np.sign(patterns), couplings)
+        stats["patterns_mean"].append(np.mean(patterns_E))
+        stats["patterns_std"].append(np.std(patterns_E))
+
+        # Mixtures (20 random per k)
+        for k in range(3, max_n + 1, 2):
+            comb = random_combinations_matrix(p, k, k=20)
+            mixtures = patterns @ comb
+            mixtures = np.sign(mixtures)
+            mixtures_E = [energy(vec, couplings) for vec in mixtures.T]
+            stats[f"{k}mix_mean"].append(np.mean(mixtures_E))
+            stats[f"{k}mix_std"].append(np.std(mixtures_E))
+
+    # Convert all to numpy arrays
+    for key in stats:
+        if isinstance(stats[key], list):
+            stats[key] = np.array(stats[key])
+
+    return stats
+
+
+def run_trial(N, p, sweep_max, T, delta=False):
+    patterns = extract_pattern(N, p, a=0.0, delta=delta)
+    J = compute_couplings(N, patterns)
+    neurons = init_neurons(patterns, "pattern")  # start from a stored pattern
+    evolution = np.fromiter(
+        dynamic(neurons, J, patterns, sweep_max, T),
+        dtype=np.dtype((float, p + 1))
+    )
+    final_magnetization = evolution[-1, :-1]  # skip last column (mixture overlap)
+    return np.mean(final_magnetization)
