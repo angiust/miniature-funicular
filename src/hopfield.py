@@ -448,7 +448,7 @@ def compute_first_pattern_capacity(N_values, load_values, sweep_max, T, s, delta
     return results
 
 
-def dinamics_only_last_magnetization(neurons, couplings, init, sweeps, temperature)
+def dinamics_only_last_magnetization(neurons, couplings, init, sweeps, temperature):
     for _ in range(sweeps):
         update_neurons(neurons, couplings, temperature)
     
@@ -457,27 +457,35 @@ def dinamics_only_last_magnetization(neurons, couplings, init, sweeps, temperatu
             magnetization, energy(neurons, couplings)
         )  # shape (2,)
 
-def last_magnetization_until_n (N, p, sweep_max, a, T, delta: Optional[bool] = False)
+def last_magnetization_until_n(N, p, sweep_max, a, T, max_n, delta: Optional[bool] = False):
+    results = {}
     patterns = extract_pattern(N, p, a, delta)
     couplings = compute_couplings(N, patterns)
 
     # pattern mean final magnetization
-    patterns_mag = []
-    for i in range(p):
-        neurons = init_net_on_a_pattern(patterns, i)
-        patterns_mag.append(dinamics_only_last_magnetization(neurons, couplings, patterns[:, i], sweep_max, T))
+    neurons = init_net_on_a_pattern(patterns, np.arange(p))
+    patterns_mag = np.array([dinamics_only_last_magnetization(neurons[:, i], couplings, patterns[:, i], sweep_max, T)[0] for i in range(p)])
+    patterns_energy = np.array([dinamics_only_last_magnetization(neurons[:, i], couplings, patterns[:, i], sweep_max, T)[1] for i in range(p)])
 
-    mean_patterns_mag = np.mean(patterns_mag, axis=0)
-    std_patterns_mag = np.std(patterns_mag, axis=0)
-    # capire come salvare il risultato
+    results["patterns"] = {
+        "mag_mean": patterns_mag.mean(),
+        "mag_std": patterns_mag.std(),
+        "energy_mean": patterns_energy.mean(),
+        "energy_std": patterns_energy.std()
+    }
     # mixtures mean final magnetization
-    # Mixtures (20 random per k)
+    # mixtures (20 random per k)
     for k in range(3, max_n + 1, 2):
-        comb = random_combinations_matrix(p, k, k=20)
+        comb = random_combinations_matrix(p, k, sample_number=20)
         mixtures = np.sign(patterns @ comb)
-        mix_mag = []
-        for i in range(20):
-            mix_mag.append(dinamics_only_last_magnetization(neurons, couplings, mixtures[:, i], sweep_max, T))
-        mixtures_E = [energy(vec, couplings) for vec in mixtures.T]
-        stats[f"{k}mix_mean"].append(np.mean(mix_mag))
-        stats[f"{k}mix_std"].append(np.std(mix_mag))
+        for i in range(sample_number):
+            neurons = np.array([sign(s) for s in mixtures[:,i]], dtype=float) # np.sign(mixture_vector)
+            f"{k}mix_mag".append(dinamics_only_last_magnetization(neurons, couplings, mixtures[:, i], sweep_max, T)[0])
+            f"{k}mix_energy".append(dinamics_only_last_magnetization(neurons, couplings, mixtures[:, i], sweep_max, T)[1])
+        results[f"{k}_mix"] = {
+            "mag_mean": f"{k}mix_mag".mean(),
+            "mag_std": f"{k}mix_mag".std(),
+            "energy_mean": f"{k}mix_energy".mean(),
+            "energy_std": f"{k}mix_energy".std()
+        }
+    return results
