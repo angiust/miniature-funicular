@@ -11,6 +11,7 @@ style.py
 old_output/
 outputs/
 *.png
+*.eps
 # LaTeX files
 *blx.bib
 *.aux
