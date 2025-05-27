@@ -123,9 +123,11 @@ def init_neurons(patterns, init_type):
         return np.array([sign(s) for s in mixture_vector], dtype=float) # np.sign(mixture_vector)
     elif init_type == "random":
         return np.sign(np.random.rand(patterns.shape[0]) - 0.5)
+    elif init_type == "democratic":
+        return np.sign(np.sum(patterns, axis=1)) # np.sign(patterns @ np.ones(patterns.shape[1]))
     else:
         raise ValueError(
-            "init_type should be 'pattern', 'mixture' or 'random', not {}".format(
+            "init_type should be 'pattern', 'mixture', 'random' or 'democratic', not {}".format(
                 init_type
             )
         )
@@ -154,7 +156,7 @@ def dynamic(neurons, couplings, patterns, sweeps, temperature):
 
 
 def simulation(
-    N, p, sweep_max, a, T, init_type: Literal["pattern", "mixture", "random"], delta: Optional[bool] = False
+    N, p, sweep_max, a, T, init_type: Literal["pattern", "mixture", "random", "democratic"], delta: Optional[bool] = False
 ):
     patterns = extract_pattern(N, p, a, delta)
     couplings = compute_couplings(N, patterns)
