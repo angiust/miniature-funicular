@@ -63,6 +63,19 @@ parallel --bar --jobs 2 './run/one_sample_every_pattern_init.py --random -T {1} 
 plot:
 parallel --bar --jobs 4 'base=$(basename {} .csv); ./plot/random_plot.py --title "{=s/.csv//=}" --output outputs/plot/varyMixInit/"$base".png < {}' ::: outputs/data/varyMixInit/*.csv
 
+plot with lines:
+parallel --bar --jobs 4 '
+  a=$(echo {1} | sed -E "s/.*_a([0-9.]+)_1\.csv/\1/");
+  ./plot/mix_lines_plot.py -a $a --output outputs/plot/d_varyMixLines/d_varyMixLines_{1/.}.png < outputs/data/d_varyMixInit/{1}
+' ::: $(cd outputs/data/d_varyMixInit && ls d_varyMixInit_*.csv)
+
+multiple plot with various load:
+for P in 25 49 99; do   parallel --bar --jobs 4 '
+    a=$(echo {1} | sed -E "s/.*_a([0-9.]+)_1\.csv/\1/");
+    ./plot/mix_lines_plot.py -a $a --output outputs/plot/d_varyMix_P'"$P"'/d_varyMix_P'"$P"'_{1/.}.png < outputs/data/d_varyMix_P'"$P"'/{1}
+  ' ::: $(cd outputs/data/d_varyMix_P"$P" && ls d_varyMix_P"$P"_*.csv); done
+
+
 ### mixture init magnetization hystogram
 
 data:
@@ -70,6 +83,7 @@ parallel --bar --jobs 2 './run/hystograms.py -s 100 -T {1} -a {2} --init_type mi
 
 plot:
 parallel --bar --jobs 4 'base=$(basename {} .csv); ./plot/hystogram_plot.py --title "{=s/.csv//=}" --output outputs/plot/d_mixHyst/"$base".png < {}' ::: outputs/data/d_mixHyst/*.csv
+
 
 ### first pattern old:
 

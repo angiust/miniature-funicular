@@ -162,8 +162,8 @@ def simulation(
     neurons = init_neurons(patterns, init_type)
     if init_type == "mixture":
         mixture = np.sign(compute_mixture(patterns))
-        patterns = np.column_stack((patterns, mixture))  # now shape (N, p+1)
-        p = p + 1
+        #patterns = np.column_stack((patterns, mixture))  # now shape (N, p+1)
+        #p = p + 1
 
     return np.fromiter(
         dynamic(neurons, couplings, patterns, sweep_max, T),
@@ -464,8 +464,7 @@ def last_magnetization_until_n(N, p, sweep_max, a, T, max_n, delta: Optional[boo
 
     # pattern mean final magnetization
     neurons = init_net_on_a_pattern(patterns, np.arange(p))
-    patterns_mag = np.array([dinamics_only_last_magnetization(neurons[:, i], couplings, patterns[:, i], sweep_max, T)[0] for i in range(p)])
-    patterns_energy = np.array([dinamics_only_last_magnetization(neurons[:, i], couplings, patterns[:, i], sweep_max, T)[1] for i in range(p)])
+    patterns_mag, patterns_energy = np.array([dinamics_only_last_magnetization(neurons[:, i], couplings, patterns[:, i], sweep_max, T) for i in range(p)])
 
     results["patterns"] = {
         "mag_mean": patterns_mag.mean(),
